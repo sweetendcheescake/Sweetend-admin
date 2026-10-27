@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sweetend Admin Dashboard</title>
+<style>
+:root{--gold:#ffc43b;--orange:#f47b35;--cream:#fff4d6}
+*{box-sizing:border-box}
+body{margin:0;background:#090a08;color:#fff8e8;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;overflow:hidden}
+.stage{position:relative;min-height:100vh;overflow:hidden;background:radial-gradient(ellipse at 28% 63%,#292315 0%,#12120e 38%,#080907 78%);isolation:isolate}
+.stage:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 26% 72%,rgba(255,177,47,.22),transparent 44%);opacity:0;transition:opacity 1.4s ease;z-index:-1}
+.stage.lit:before{opacity:1}
+.floor{position:absolute;left:0;right:0;bottom:11%;height:1px;background:rgba(201,153,74,.22);box-shadow:0 18px 50px rgba(240,161,47,.08)}
+.plant{position:absolute;left:20px;bottom:12%;width:100px;height:145px;opacity:.45}
+.plant:before{content:"";position:absolute;bottom:0;left:40px;width:34px;height:35px;background:#3c2d17;border-radius:4px 4px 12px 12px}
+.leaf{position:absolute;bottom:30px;left:52px;width:28px;height:90px;background:linear-gradient(90deg,#334222,#66713b);border-radius:100% 0 100% 0;transform-origin:bottom center}
+.leaf:nth-child(1){transform:rotate(-48deg)}.leaf:nth-child(2){transform:rotate(-22deg) scale(.85)}.leaf:nth-child(3){transform:rotate(19deg) scale(.9)}.leaf:nth-child(4){transform:rotate(45deg) scale(.75)}
+.lamp{position:absolute;left:clamp(30px,11vw,155px);bottom:12%;width:180px;height:365px;z-index:3}
+.shade{position:absolute;top:18px;left:25px;width:130px;height:62px;background:linear-gradient(#050505 0 62%,#1a1710 63% 100%);border-radius:90px 90px 14px 14px;border:1px solid #5d4a2c;box-shadow:0 8px 18px #000}
+.bulb{position:absolute;top:68px;left:76px;width:28px;height:12px;border-radius:50%;background:#5c4923;transition:all .8s;z-index:1}
+.lit .bulb{background:#fff1a7;box-shadow:0 0 18px 8px #ffc13b,0 0 55px 24px rgba(255,174,42,.55)}
+.stem{position:absolute;top:77px;left:87px;width:7px;height:260px;background:linear-gradient(90deg,#080807,#51412b,#0b0a08);border-radius:5px}
+.base{position:absolute;left:39px;bottom:0;width:103px;height:18px;border-radius:50%;background:linear-gradient(#342b1c,#050505);border:1px solid #6a512d;box-shadow:0 4px 8px #000}
+.beam{position:absolute;top:73px;left:-95px;width:320px;height:300px;background:linear-gradient(180deg,rgba(255,206,95,.6),rgba(255,182,52,.08) 70%,transparent);clip-path:polygon(40% 0,60% 0,100% 100%,0 100%);filter:blur(5px);opacity:0;transition:opacity 1.3s;pointer-events:none}
+.lit .beam{opacity:1}
+.cord{position:absolute;top:76px;left:135px;width:2px;height:105px;background:#ad8d51;transform-origin:top;transition:transform .2s}
+.cord-handle{position:absolute;left:-5px;bottom:-12px;width:12px;height:25px;border-radius:6px;background:linear-gradient(90deg,#a77626,#ffe09a,#b77a1b);border:1px solid #ffdf8a;box-shadow:0 0 9px rgba(255,193,59,.25);cursor:grab;touch-action:none;z-index:8}
+.cord-handle:after{content:"";position:absolute;inset:-8px;border:1px solid rgba(255,199,76,.0);border-radius:10px;transition:border .2s}
+.cord-handle:hover:after,.cord-handle:focus-visible:after{border-color:rgba(255,199,76,.75)}
+.cord-handle:focus-visible{outline:2px solid #ffd36d;outline-offset:9px}
+.lamp.pulled .cord{transform:scaleY(1.28)}
+.lamp.pulled .cord-handle{box-shadow:0 0 18px #ffc13b}
+.hint{position:absolute;left:50%;bottom:-36px;transform:translateX(-50%);font-size:11px;white-space:nowrap;color:#c9b98e;letter-spacing:.4px}
+.lamp.lit .hint{color:#ffd878}
+.login-panel{position:absolute;right:clamp(18px,6vw,85px);top:50%;transform:translate(20px,-50%);width:min(410px,calc(100vw - 42px));padding:28px 30px 25px;border:1px solid rgba(255,196,59,.4);border-radius:22px;background:rgba(28,26,21,.88);box-shadow:0 20px 65px rgba(0,0,0,.48),0 0 40px rgba(255,173,46,.08);backdrop-filter:blur(14px);opacity:0;visibility:hidden;transition:opacity .9s ease,transform .9s cubic-bezier(.2,.8,.2,1),visibility .9s;z-index:2}
+.lit .login-panel{opacity:1;visibility:visible;transform:translate(0,-50%)}
+.mini-logo{display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 12px;width:fit-content;color:#ffb13f;filter:drop-shadow(0 0 8px rgba(255,174,57,.16))}
+.mini-logo-icon{width:38px;height:34px;margin-bottom:1px}
+.mini-logo-word{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:700;font-size:26px;letter-spacing:-.8px;line-height:1.05}
+.mini-logo-sub{font-size:8px;letter-spacing:2.2px;margin-top:4px;color:#f5ce83}
+h1{text-align:center;font-size:27px;margin:20px 0 5px;letter-spacing:-.7px}
+.subtitle{text-align:center;color:#c5bca9;font-size:12px;margin:0 0 21px}
+.field{margin:0 0 13px}
+label{display:block;font-size:11px;color:#e7d9bc;margin-bottom:6px}
+input{width:100%;padding:12px 13px;background:#11110f;border:1px solid #51412a;border-radius:10px;color:#fff5dc;font:inherit;font-size:13px;outline:none}
+input:focus{border-color:#ffc13b;box-shadow:0 0 0 3px rgba(255,193,59,.12)}
+input::placeholder{color:#857a63}
+.submit{width:100%;border:0;border-radius:10px;padding:13px;margin-top:5px;background:linear-gradient(100deg,#ffd342,#ffab20);color:#241704;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 5px 20px rgba(255,177,32,.18);transition:transform .2s}
+.submit:hover{transform:translateY(-2px)}
+.extras{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#c9bea5;margin:13px 0}
+a{color:#ffc95b;text-decoration:none}a:hover{text-decoration:underline}
+.bottom{text-align:center;color:#c7bda7;font-size:11px;margin:16px 0 0}
+.bottom button{border:0;background:none;color:#ffc95b;font:inherit;font-weight:700;cursor:pointer}
+.fireflies{position:absolute;inset:0;pointer-events:none;z-index:1}
+.firefly{position:absolute;width:4px;height:4px;border-radius:50%;background:#ffcf48;box-shadow:0 0 9px 3px rgba(255,192,55,.65);opacity:.1;animation:drift var(--dur) var(--delay) ease-in-out infinite alternate}
+@keyframes drift{0%{transform:translate(0,0);opacity:.12}50%{opacity:.9}100%{transform:translate(var(--dx),var(--dy));opacity:.3}}
+.top-note{position:absolute;top:22px;left:25px;color:#d7b977;font-size:10px;letter-spacing:2px;opacity:.8}
+.toast{position:fixed;bottom:18px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#262116;border:1px solid #765a2b;border-radius:10px;padding:11px 14px;color:#ffe7b0;font-size:12px;z-index:20;transition:.25s;text-align:center;max-width:calc(100% - 28px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+/* Desktop: balanced two-column composition, centered in equal halves */
+@media(min-width:701px){
+  .lamp{left:calc(25% - 90px);bottom:12%;transform:none}
+  .login-panel{left:75%;right:auto;top:50%;width:min(410px,42vw);transform:translate(calc(-50% + 22px),-50%)}
+  .lit .login-panel{transform:translate(-50%,-50%)}
+}
+/* Small screens: stack the login card over the lower lamp area */
+@media(max-width:700px){.lamp{left:calc(50% - 90px);bottom:5%;transform:scale(.58);transform-origin:bottom center;opacity:.9}.login-panel{right:50%;top:43%;transform:translate(50%,20px);width:min(380px,calc(100vw - 28px));padding:22px 22px 20px}.lit .login-panel{transform:translate(50%,-50%)}.plant{display:none}.top-note{top:12px;left:14px;font-size:8px}.stage{min-height:100svh}.hint{bottom:-34px}.login-panel h1{font-size:24px}}
+@media(max-height:650px) and (min-width:701px){.lamp{transform:scale(.78);transform-origin:bottom left}.login-panel{padding:18px 24px}.login-panel h1{margin-top:10px}.field{margin-bottom:8px}.subtitle{margin-bottom:12px}.extras{margin:8px 0}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Owner dashboard — separate Products integration test */
+#dashboardView{display:none;position:relative;z-index:10;width:min(1120px,calc(100% - 28px));max-height:calc(100vh - 28px);overflow:auto;margin:14px auto;padding:22px;border:1px solid #5b4828;border-radius:22px;background:rgba(15,15,12,.96);box-shadow:0 0 70px #ffc43b18}
+#dashboardView .dash-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+#dashboardView .brand{color:#ffd477;font-weight:800;letter-spacing:.08em}
+#dashboardView .muted{color:#c3b79b;font-size:13px}
+#dashboardView .logout{width:auto;margin:0;padding:10px 14px;border:1px solid #6c562e;border-radius:10px;background:#221d12;color:#ffe9b3}
+#dashboardView h2{margin:5px 0 18px;font-size:clamp(23px,4vw,34px)}
+#dashboardView .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+#dashboardView .stat,#dashboardView .dash-section{border:1px solid #4a3b23;border-radius:14px;background:#17160f;padding:15px}
+#dashboardView .stat small{display:block;color:#c3b79b;margin-bottom:8px}
+#dashboardView .stat strong{font-size:24px;color:#ffcf65}
+#dashboardView .dash-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;margin-top:14px}
+#dashboardView h3{margin:0 0 12px;color:#ffe8b3}
+#dashboardView table{width:100%;border-collapse:collapse;font-size:13px}
+#dashboardView th,#dashboardView td{text-align:left;padding:10px 6px;border-bottom:1px solid #3a3020}
+#dashboardView th{color:#cdbb93;font-weight:600}
+#dashboardView .demo-tag{display:inline-block;color:#211707;background:#ffd477;border-radius:99px;padding:4px 8px;font-size:11px;font-weight:800}
+#dashboardView .product-row{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid #3a3020}
+#dashboardView .product-row:last-child{border-bottom:0}
+#dashboardView .next-note{margin-top:14px;padding:12px;border-radius:12px;background:#201b10;color:#e8d6a7;font-size:13px;line-height:1.5}
+@media(max-width:700px){#dashboardView .stats{grid-template-columns:repeat(2,minmax(0,1fr))}#dashboardView .dash-grid{grid-template-columns:1fr}#dashboardView{padding:15px}}
+
+
+.auth-modes{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:18px}
+.auth-modes button{width:auto;margin:0;padding:9px 12px;border:1px solid #8e7138;border-radius:10px;background:#1a170f;color:#ffd477;font-size:13px}
+.auth-modes button.active{background:#ffd477;color:#17120a}
+
+/* Cord interaction fix: keep the pull handle above the login panel and usable on touch screens. */
+.lamp{z-index:6;pointer-events:none}
+.lamp .cord,.lamp .cord-handle,.lamp .hint{pointer-events:auto}
+.cord{z-index:7}
+.cord-handle{z-index:20;min-width:28px;min-height:32px;touch-action:none;pointer-events:auto}
+.login-panel{z-index:2}
+.stage:not(.lit) .login-panel{pointer-events:none}
+.stage.lit .login-panel{pointer-events:auto}
+
+
+/* Larger, reliable touch target for the lamp cord. */
+.cord-handle{width:24px!important;height:34px!important;left:-11px!important;bottom:-16px!important;z-index:30!important;pointer-events:auto!important;touch-action:none!important}
+.cord{z-index:20!important;pointer-events:auto!important}
+.lamp{pointer-events:none}
+.lamp .cord,.lamp .cord-handle,.lamp .hint{pointer-events:auto}
+
+/* V7: role-based visibility + orders/staff rows */
+body[data-role="staff"] [data-owner-only]{display:none!important}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;border:1px solid #8e7138;color:#ffd477;margin-left:6px}
+.badge.pending{color:#ffcf65}.badge.approved{color:#9be39b;border-color:#4f8a4f}.badge.rejected{color:#ff9b86;border-color:#8e4a3a}
+.status-select{background:#1a170f;color:#ffd477;border:1px solid #8e7138;border-radius:8px;padding:6px;font-size:12px}
+.sales-summary{margin:6px 0 12px;font-size:13px;color:#ffcf65;line-height:1.6}
+/* ===== V8 premium luxury dashboard ===== */
+html{scroll-behavior:smooth}
+#dashboardView{max-height:none;overflow:visible;padding:0 0 30px;margin:14px auto;border:1px solid rgba(214,168,76,.35);border-radius:26px;background:linear-gradient(180deg,#15120b 0%,#0b0a07 55%);box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 80px rgba(255,196,59,.08)}
+#dashboardView > :not(.topbar){margin-left:22px;margin-right:22px}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 22px;background:rgba(12,10,7,.84);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid rgba(214,168,76,.25);border-radius:25px 25px 0 0}
+.tb-brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.tb-mark{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#f6d98a,#a97420);color:#1a1205;font-size:15px;box-shadow:0 0 18px rgba(255,196,59,.25)}
+.tb-name{font-family:"Playfair Display",Georgia,"Times New Roman",serif;font-size:17px;letter-spacing:.14em;color:#f3d996;line-height:1.1}
+.tb-sub{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#b9a77a;margin-top:2px}
+.tb-kpis{display:flex;gap:8px}
+.tb-kpi{padding:6px 12px;border-radius:12px;border:1px solid rgba(214,168,76,.28);background:rgba(255,196,59,.06);min-width:78px}
+.tb-kpi small{display:block;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#b9a77a}
+.tb-kpi b{display:block;font-family:"Playfair Display",Georgia,serif;font-size:17px;font-weight:600;color:#ffd98a;margin-top:1px}
+#dashboardView .topbar .logout{padding:8px 14px}
+.eyebrow{margin-top:24px;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:#c9a24f}
+#dashboardView h2{font-family:"Playfair Display",Georgia,"Times New Roman",serif;font-weight:500;font-size:clamp(26px,5vw,40px);margin:6px 0 22px;background:linear-gradient(90deg,#fff3cf,#e6b85a);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+#dashboardView .stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+#dashboardView .stat{position:relative;overflow:hidden;padding:18px;border-radius:18px;border:1px solid rgba(214,168,76,.28);background:linear-gradient(160deg,#1c1911,#100e09);box-shadow:inset 0 1px 0 rgba(255,236,181,.08),0 10px 30px rgba(0,0,0,.35)}
+#dashboardView .stat:after{content:"";position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(255,196,59,.14),transparent 70%)}
+#dashboardView .stat small{display:block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#b9a77a;margin-bottom:10px}
+#dashboardView .stat strong{display:block;font-family:"Playfair Display",Georgia,"Times New Roman",serif;font-size:clamp(26px,5vw,34px);font-weight:600;line-height:1.1;background:linear-gradient(135deg,#fff0c2,#e2b04c 55%,#b9822a);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+#dashboardView .stat.feature{grid-column:span 2;border-color:rgba(246,217,138,.5);background:linear-gradient(135deg,#3b2c10,#1b150a 60%,#120f08)}
+#dashboardView .stat.feature strong{font-size:clamp(32px,7vw,46px)}
+#dashboardView .stat.wide{grid-column:span 2}
+#dashboardView .stat strong.small{font-size:17px}
+#dashboardView .dash-section{padding:20px;border:1px solid rgba(214,168,76,.25);border-radius:20px;background:linear-gradient(165deg,#17140d,#0e0c08);box-shadow:inset 0 1px 0 rgba(255,236,181,.06)}
+#dashboardView h3{font-family:"Playfair Display",Georgia,"Times New Roman",serif;font-weight:500;font-size:20px;color:#f3d996;letter-spacing:.02em;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid rgba(214,168,76,.18)}
+#dashboardView .logout{border:1px solid rgba(214,168,76,.4);border-radius:12px;background:linear-gradient(180deg,#2a2213,#1b160b);color:#f6dfa0;font-weight:600;cursor:pointer;transition:border-color .2s,transform .2s}
+#dashboardView .logout:hover{border-color:#ffd477;transform:translateY(-1px)}
+#dashboardView .product-row{align-items:center;padding:14px 12px;margin:0 0 8px;border:1px solid rgba(214,168,76,.14);border-bottom:1px solid rgba(214,168,76,.14);border-radius:14px;background:rgba(255,255,255,.025)}
+#dashboardView .product-row[data-status="new"]{border-left:3px solid #ffc43b}
+#dashboardView .product-row[data-status="confirmed"]{border-left:3px solid #6fb3ff}
+#dashboardView .product-row[data-status="delivered"]{border-left:3px solid #6ecf8a}
+#dashboardView .product-row[data-status="cancelled"]{border-left:3px solid #d96a55;opacity:.7}
+#dashboardView .sales-summary{padding:10px 12px;border-radius:12px;border:1px dashed rgba(214,168,76,.3);background:rgba(255,196,59,.05);color:#f0d38c}
+#dashboardView .sales-summary:empty{display:none}
+.dash-foot{margin-top:18px;text-align:center;font-size:11px;letter-spacing:.12em;color:#8f7f58}
+@media(max-width:700px){
+  #dashboardView{width:100%;margin:0;border-radius:0;border-left:0;border-right:0}
+  #dashboardView > :not(.topbar){margin-left:14px;margin-right:14px}
+  .topbar{padding:10px 14px;border-radius:0;gap:10px}
+  .tb-kpis{order:3;width:100%}
+  .tb-kpi{flex:1;min-width:0}
+  #dashboardView .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #dashboardView .stat.wide{grid-column:span 1}
+  #dashboardView .stat strong.small{font-size:15px}
+  #dashboardView .stats{gap:10px}
+}
+/* V8 filters */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.chip{padding:8px 14px;border-radius:99px;border:1px solid rgba(214,168,76,.4);background:rgba(255,196,59,.05);color:#f0d38c;font-size:12px;font-weight:700;cursor:pointer}
+.chip.active{background:linear-gradient(135deg,#ffd77a,#e0a53a);color:#1a1205;border-color:transparent}
+.date-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:12px}
+.date-row label{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#b9a77a}
+.date-row input{display:block;margin-top:5px;padding:9px 10px;border-radius:10px;border:1px solid rgba(214,168,76,.4);background:#14110b;color:#f6dfa0;color-scheme:dark;font:inherit;font-size:14px}
+.bd-row{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:6px;border-radius:12px;border:1px solid rgba(214,168,76,.14);background:rgba(255,255,255,.025);font-size:13px}
+.bd-row b{color:#ffd98a;font-family:Georgia,serif}.bd-head{margin:6px 0 8px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#b9a77a}
+.chk{padding:8px 0;font-size:13px;border-bottom:1px solid rgba(214,168,76,.12)}.chk.ok{color:#9be39b}.chk.bad{color:#ff9b86}
+
+/* ===== V9: order details modal + search ===== */
+#orderSearch{width:100%;margin:10px 0 4px;padding:11px 14px;border-radius:12px;border:1px solid rgba(214,168,76,.35);background:#14110a;color:#ffe9b3;font-size:14px}
+.ord-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:stretch}
+.ord-actions .logout{padding:7px 12px!important;font-size:12px}
+#orderModal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:14px;background:rgba(0,0,0,.72)}
+#orderModal.open{display:flex}
+.om-card{width:100%;max-width:560px;max-height:88vh;overflow:auto;border:1px solid rgba(214,168,76,.45);border-radius:20px;background:linear-gradient(180deg,#17130b,#0c0a07);color:#f1e6c8;padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.7)}
+.om-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.om-head h4{margin:0;font-family:"Playfair Display",Georgia,serif;font-size:20px;color:#ffd98a;letter-spacing:.04em}
+.om-sub{font-size:12px;color:#b9a77a;margin-top:3px;overflow-wrap:anywhere}
+.om-x{background:none;border:1px solid rgba(214,168,76,.4);color:#f6dfa0;border-radius:10px;width:34px;height:34px;font-size:18px;cursor:pointer;flex-shrink:0}
+.om-sec{margin-top:16px}
+.om-sec>small{display:block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#c9a24f;margin-bottom:6px}
+.om-grid{display:grid;grid-template-columns:110px 1fr;gap:6px 10px;font-size:14px}
+.om-grid span:nth-child(odd){color:#b9a77a}
+.om-grid span:nth-child(even){overflow-wrap:anywhere}
+.om-grid a{color:#ffd477}
+.om-items{width:100%;border-collapse:collapse;font-size:13px}
+.om-items th{font-weight:500;text-align:left;color:#b9a77a;font-size:11px;padding:4px 0}
+.om-items td{padding:7px 0;border-top:1px solid rgba(214,168,76,.15)}
+.om-items td:nth-child(n+2),.om-items th:nth-child(n+2){text-align:right;padding-left:8px}
+.om-total{display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid rgba(214,168,76,.35);font-size:16px;color:#ffd98a}
+.om-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.om-btns .logout{padding:9px 14px}
+
+.burger{width:42px;height:38px;display:flex;flex-direction:column;justify-content:center;gap:5px;padding:0 10px;border:1px solid rgba(214,168,76,.4);border-radius:12px;background:linear-gradient(180deg,#2a2213,#1b160b);cursor:pointer}
+.burger span{display:block;height:2px;background:#f6dfa0;border-radius:3px}
+#navScrim{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .25s}
+#navScrim.open{opacity:1;pointer-events:auto}
+#sideNav{position:fixed;top:0;bottom:0;left:0;width:min(82vw,300px);z-index:91;transform:translateX(-102%);transition:transform .28s ease;background:linear-gradient(180deg,#17130b,#0c0a07);border-right:1px solid rgba(214,168,76,.4);padding:18px 14px;display:flex;flex-direction:column;gap:6px;overflow:auto}
+#sideNav.open{transform:none}
+.sn-user{padding:6px 8px 16px;border-bottom:1px solid rgba(214,168,76,.25);margin-bottom:8px}.sn-user b{display:block;color:#ffd98a;font-size:17px;overflow-wrap:anywhere}.sn-user small{color:#b9a77a;overflow-wrap:anywhere}
+#sideNav>button{text-align:left;padding:13px 12px;border:0;border-radius:12px;background:transparent;color:#f1e6c8;font-size:15px;cursor:pointer}
+#sideNav>button:hover{background:rgba(214,168,76,.12)}#sideNav .sn-out{margin-top:auto;border:1px solid rgba(214,168,76,.4);color:#ffd98a}
+body[data-role="staff"] #sideNav [data-owner-only]{display:none!important}
+.dash-section{scroll-margin-top:84px}
+.menu-tools{display:flex;gap:8px;margin:10px 0}.menu-tools input,.menu-tools select{flex:1;min-width:0;padding:11px 12px;border-radius:12px;border:1px solid rgba(214,168,76,.35);background:#14110a;color:#ffe9b3;font-size:14px}
+.menu-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.pr-thumb{width:52px;height:52px;border-radius:12px;object-fit:cover;background:#221d12;display:grid;place-items:center;font-size:24px;flex:0 0 auto}
+.pr-av{display:inline-flex;align-items:center;gap:6px;font-size:12px;margin-top:6px;cursor:pointer}.pr-av input{width:auto}
+.mdl{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(0,0,0,.72)}.mdl[hidden]{display:none}
+.mdl-card{width:100%;max-width:460px;max-height:90vh;overflow:auto;border:1px solid rgba(214,168,76,.45);border-radius:20px;background:linear-gradient(180deg,#17130b,#0c0a07);color:#f1e6c8;padding:20px}
+.mdl-card h3{margin:0 0 12px;color:#ffd98a}.mdl-card select,.mdl-card textarea{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(214,168,76,.35);background:#14110a;color:#ffe9b3;font-size:14px}
+.ph-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.ph-row img{width:76px;height:76px;border-radius:12px;object-fit:cover}.photo-btn{cursor:pointer;display:inline-block}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px;margin:12px 0}.chk input{width:auto}
+
+/* ===== V11 premium: password eye, count-up, insights ===== */
+.pw-wrap{position:relative}.pw-wrap input{padding-right:50px!important}
+.pw-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:40px;height:40px;display:grid;place-items:center;border:0;border-radius:10px;background:transparent;color:#d9b45f;cursor:pointer;padding:0}
+.pw-eye:hover,.pw-eye[aria-pressed="true"]{background:rgba(214,168,76,.16);color:#ffd477}
+.pw-eye svg{width:22px;height:22px}.pw-eye .slash{display:none}.pw-eye[aria-pressed="true"] .slash{display:block}
+.counting{filter:drop-shadow(0 0 8px rgba(255,196,59,.35))}
+#dashboardView .stat strong,.tb-kpi b,.wk-summary b{font-variant-numeric:tabular-nums}
+.wk-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.wk-nav button,.cal-head button{width:38px;height:38px;border-radius:12px;border:1px solid rgba(214,168,76,.4);background:rgba(255,196,59,.06);color:#ffd98a;font-size:20px;cursor:pointer;padding:0}
+.wk-nav button:disabled,.cal-head button:disabled{opacity:.3;cursor:default}
+.wk-nav div{text-align:center}.wk-nav b{display:block;font-family:"Playfair Display",Georgia,serif;font-size:18px;color:#ffe3a1}.wk-nav small{color:#b9a77a;font-size:12px}
+.wk-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.wk-summary>div{padding:10px;border-radius:14px;border:1px solid rgba(214,168,76,.2);background:rgba(255,255,255,.025)}
+.wk-summary small{display:block;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#b9a77a;margin-bottom:4px}
+.wk-summary b{font-family:Georgia,serif;font-size:18px;color:#ffd98a;overflow-wrap:anywhere}
+.wk-summary b.up{color:#8fe0a0}.wk-summary b.down{color:#ff9b86}
+@media(max-width:700px){.wk-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.bars{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;height:200px;padding:6px 2px 0}
+.bar-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-width:0;cursor:pointer;background:none;border:0;padding:0;color:inherit;font:inherit}
+.bar-pct{font-size:11px;color:#f0d38c;height:16px;font-variant-numeric:tabular-nums}
+.bar-track{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.055))}
+.bar{display:block;width:68%;max-width:38px;height:3px;border-radius:10px 10px 4px 4px;background:linear-gradient(180deg,#ffe29a,#d49a31 60%,#a8721d);opacity:.5;transition:height .9s cubic-bezier(.2,.8,.2,1),opacity .3s,box-shadow .3s}
+.bar-col.sel .bar{opacity:1;box-shadow:0 0 20px rgba(255,196,59,.45)}
+.bar-col.today .bar-day{color:#ffd477}.bar-col.future{cursor:default;opacity:.45}
+.bar-day{display:block;margin-top:6px;font-size:11px;color:#b9a77a;line-height:1.25;text-align:center}.bar-day small{display:block;font-size:12px;color:#e9d7a6}
+.day-detail{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:14px 0;padding:12px 14px;border-radius:14px;border:1px dashed rgba(214,168,76,.35);background:rgba(255,196,59,.05);font-size:13px;color:#f0d38c}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin:18px 0 10px}.cal-head b{font-family:"Playfair Display",Georgia,serif;font-size:17px;color:#ffe3a1}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.cal-wd{text-align:center;font-size:10px;letter-spacing:.1em;color:#b9a77a;padding-bottom:2px}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border:0;border-radius:11px;font-size:13px;color:#f1e6c8;cursor:pointer;background:rgba(255,196,59,calc(.05 + var(--i,0)*.38));font-family:inherit;padding:0}
+.cal-day i{font-style:normal;font-size:9px;color:#ffe3a1}.cal-day.empty{visibility:hidden}
+.cal-day.inweek{box-shadow:inset 0 0 0 1px rgba(255,215,122,.55)}.cal-day.today{outline:1.5px solid #ffd477;outline-offset:-1.5px}
+.cal-day.sel{background:linear-gradient(135deg,#ffd77a,#e0a53a);color:#1a1205;font-weight:800}.cal-day.sel i{color:#1a1205}
+.cal-day.future{opacity:.35;cursor:default}
+</style>
+</head>
+<body>
+<main class="stage" id="stage">
+  <div class="top-note">SWEETEND CHEESECAKE · OWNER DASHBOARD</div>
+  <div class="fireflies" id="fireflies" aria-hidden="true"></div>
+  <div class="plant" aria-hidden="true"><i class="leaf"></i><i class="leaf"></i><i class="leaf"></i><i class="leaf"></i></div>
+  <div class="floor"></div>
+  <div class="lamp" id="lamp">
+    <div class="beam"></div><div class="shade"></div><div class="bulb"></div><div class="stem"></div><div class="base"></div>
+    <div class="cord" id="cord"><button class="cord-handle" id="pull" aria-label="Pull lamp cord to turn on the light" title="Click or pull to turn on the lamp"></button></div>
+    <div class="hint" id="hint">Click or pull the cord</div>
+  </div>
+  <section class="login-panel" id="loginPanel" aria-live="polite">
+    <div class="mini-logo" aria-label="Sweetend Cheesecake logo">
+      <svg class="mini-logo-icon" viewBox="0 0 48 42" role="img" aria-hidden="true">
+        <path d="M9 20h30l-3 7H12l-3-7Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M12 28h24v5H12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M16 20c0-5 4-8 8-8s8 3 8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M24 10c-5-4-2-8 1-5 3-3 6 1 1 5l-1 1-1-1Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+      <span class="mini-logo-word">Sweetend</span>
+      <span class="mini-logo-sub">CHEESECAKE</span>
+    </div>
+    <h1 id="title">Welcome Back</h1><p class="subtitle" id="subtitle">Enter your details to access your account</p>
+    <form id="authForm">
+      <div class="field" id="nameField" hidden><label for="name">Full name</label><input id="name" placeholder="Your name" autocomplete="name"></div>
+      <div class="field"><label for="email">Email address</label><input id="email" type="email" placeholder="you@example.com" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" required></div>
+      <div class="field"><label for="password">Password</label><div class="pw-wrap"><input id="password" type="password" placeholder="Enter password" autocomplete="current-password" minlength="6" required><button type="button" class="pw-eye" id="pwEye" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/><line class="slash" x1="3" y1="3" x2="21" y2="21"/></svg></button></div></div>
+      <div class="extras"><span id="accessModeNote">Owner access</span><a href="#" id="forgot">Forgot password?</a></div>
+      <button class="submit" id="submitBtn" type="submit">Sign In ↗</button>
+      <div id="authError" role="alert" style="display:none;margin-top:12px;padding:10px 12px;border:1px solid #8e4a3a;border-radius:10px;background:#2a1511;color:#ffb4a2;font-size:13px;line-height:1.45;text-align:left;overflow-wrap:anywhere"></div>
+      <div class="auth-modes" aria-label="Choose login mode">
+        <button id="ownerModeBtn" class="active" type="button">Owner Login</button>
+        <button id="staffModeBtn" type="button">Staff Login</button>
+        <button id="requestModeBtn" type="button">Request Staff Access</button>
+      </div>
+    </form>
+    <p class="bottom" id="bottom">New to the dashboard? <button id="switchMode" type="button">Create account</button></p>
+  </section>
+</main>
+
+<section id="dashboardView" aria-label="Owner dashboard">
+  <div class="topbar">
+    <button class="burger" id="burgerBtn" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    <div class="tb-brand">
+      <div class="tb-mark">✦</div>
+      <div><div class="tb-name">SWEETEND</div><div class="tb-sub" id="roleLabel">Owner workspace</div></div>
+    </div>
+    <div class="tb-kpis" aria-label="Live totals">
+      <div class="tb-kpi"><small>Orders</small><b id="stickyOrders">—</b></div>
+      <div class="tb-kpi" data-owner-only><small>Sales</small><b id="stickySales">—</b></div>
+      <div class="tb-kpi"><small>Pending</small><b id="stickyPending">—</b></div>
+    </div>
+    <button class="logout" id="logoutBtn" type="button">Sign out</button>
+  </div>
+  <div class="eyebrow" id="todayLabel">Welcome back</div>
+  <h2>Good to see you, <span id="welcomeName">Owner</span>.</h2>
+  <div class="stats">
+    <div class="stat feature" data-owner-only><small>Total sales</small><strong id="totalSales">—</strong></div>
+    <div class="stat"><small>Total orders</small><strong id="totalOrders">—</strong></div>
+    <div class="stat" data-owner-only><small>Sales today</small><strong id="salesToday">—</strong></div>
+    <div class="stat"><small>Orders today</small><strong id="ordersToday">—</strong></div>
+    <div class="stat" data-owner-only><small>Sales this week</small><strong id="salesWeek">—</strong></div>
+    <div class="stat"><small>Orders this week</small><strong id="ordersWeek">—</strong></div>
+    <div class="stat"><small>Pending orders</small><strong id="pendingOrders">—</strong></div>
+    <div class="stat"><small>Products</small><strong id="productCount">—</strong></div>
+    <div class="stat wide"><small>Product sync</small><strong class="small" id="productConnection">Not tested</strong></div>
+  </div>
+  <div class="dash-section" id="secInsights" style="margin-top:14px">
+    <h3>Order insights</h3>
+    <div class="wk-nav"><button type="button" id="wkPrev" aria-label="Previous week">‹</button><div><b id="wkLabel">This week</b><small id="wkRange">—</small></div><button type="button" id="wkNext" aria-label="Next week">›</button></div>
+    <div class="wk-summary">
+      <div><small>Orders</small><b id="wkTotal">—</b></div>
+      <div><small>Daily avg</small><b id="wkAvg">—</b></div>
+      <div data-owner-only><small>Sales</small><b id="wkSales">—</b></div>
+      <div><small>vs last week</small><b id="wkVs">—</b></div>
+    </div>
+    <div class="bars" id="wkBars" role="group" aria-label="Orders per day, with share of the week"><button type="button" class="bar-col"><span class="bar-pct">0%</span><span class="bar-track"><span class="bar"></span></span><span class="bar-day"></span></button><button type="button" class="bar-col"><span class="bar-pct">0%</span><span class="bar-track"><span class="bar"></span></span><span class="bar-day"></span></button><button type="button" class="bar-col"><span class="bar-pct">0%</span><span class="bar-track"><span class="bar"></span></span><span class="bar-day"></span></button><button type="button" class="bar-col"><span class="bar-pct">0%</span><span class="bar-track"><span class="bar"></span></span><span class="bar-day"></span></button><button type="button" class="bar-col"><span class="bar-pct">0%</span><span class="bar-track"><span class="bar"></span></span><span class="bar-day"></span></button><button type="button" class="bar-col"><span class="bar-pct">0%</span><span class="bar-track"><span class="bar"></span></span><span class="bar-day"></span></button><button type="button" class="bar-col"><span class="bar-pct">0%</span><span class="bar-track"><span class="bar"></span></span><span class="bar-day"></span></button></div>
+    <div class="day-detail"><span id="dayDetailText">—</span><button type="button" class="logout" id="viewDayBtn">View orders ↓</button></div>
+    <div class="cal-head"><button type="button" id="calPrev" aria-label="Previous month">‹</button><b id="calTitle">—</b><button type="button" id="calNext" aria-label="Next month">›</button></div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+  <div class="dash-section" id="secMenu" style="margin-top:14px">
+    <h3>Edit menu</h3>
+    <p class="muted" id="productStatus" aria-live="polite">Products have not been loaded yet.</p>
+    <div class="menu-tools"><input id="menuSearch" type="search" placeholder="Search products by name…" autocomplete="off"><select id="menuCat"><option value="">All categories</option></select></div>
+    <div class="menu-actions"><button class="logout" id="addProductBtn" type="button">＋ Add product</button><button class="logout" id="importMenuBtn" type="button">Import website menu</button><button class="logout" id="reloadProductsBtn" type="button">Reload</button></div>
+    <div id="productsList" aria-live="polite"></div>
+  </div>
+  <div class="dash-section" style="margin-top:14px">
+    <h3>Orders and sales</h3>
+    <div class="chips" id="rangeChips">
+      <button type="button" class="chip" data-preset="today">Today</button>
+      <button type="button" class="chip" data-preset="yesterday">Yesterday</button>
+      <button type="button" class="chip" data-preset="week">This week</button>
+      <button type="button" class="chip" data-preset="month">This month</button>
+      <button type="button" class="chip" data-preset="all">All</button>
+    </div>
+    <div class="date-row">
+      <label>From<input type="date" id="fromDate"></label>
+      <label>To<input type="date" id="toDate"></label>
+      <button type="button" class="logout" id="applyRangeBtn">Apply</button>
+    </div>
+    <div class="sales-summary" id="salesSummary" data-owner-only></div>
+    <p class="muted" id="ordersStatus" aria-live="polite">Orders have not been loaded yet.</p>
+    <div class="chips" id="groupChips" style="margin-top:14px">
+      <button type="button" class="chip active" data-group="day">Daily</button>
+      <button type="button" class="chip" data-group="week">Weekly</button>
+    </div>
+    <div id="breakdown"></div>
+    <input id="orderSearch" type="search" placeholder="Search by order ID, customer name or phone" autocomplete="off">
+    <div id="ordersList" aria-live="polite"></div>
+    <button class="logout" id="reloadOrdersBtn" type="button" style="margin-top:12px">Reload orders</button>
+  </div>
+  <div class="dash-section" style="margin-top:14px" data-owner-only>
+    <h3>Staff access</h3>
+    <p class="muted" id="staffStatus" aria-live="polite">Staff requests have not been loaded yet.</p>
+    <div id="staffList" aria-live="polite"></div>
+    <button class="logout" id="reloadStaffBtn" type="button" style="margin-top:12px">Reload staff</button>
+  </div>
+  <div class="dash-section" style="margin-top:14px" data-owner-only>
+    <h3>System check</h3>
+    <p class="muted">If staff approval or orders do not load, run this. A red line means the latest <b>firestore.rules</b> are not published.</p>
+    <div id="checkList"></div>
+    <button class="logout" id="runCheckBtn" type="button" style="margin-top:12px">Run check</button>
+  </div>
+  <div class="dash-foot">SWEETEND CHEESECAKE · LOVE AT FIRST SLICE</div>
+</section>
+
+<div id="navScrim"></div>
+<aside id="sideNav" aria-label="Dashboard menu"><div class="sn-user"><b id="navName">—</b><small id="navMeta">—</small></div>
+  <button type="button" data-go="top">🏠 Overview</button><button type="button" data-go="secInsights">📊 Insights</button><button type="button" data-go="secOrders">🧾 Orders</button><button type="button" data-go="secMenu">🍰 Edit menu</button>
+  <button type="button" data-go="secStaff" data-owner-only>👥 Staff access</button><button type="button" data-go="secCheck" data-owner-only>🛠 System check</button>
+  <button type="button" data-go="profile">👤 Edit profile</button><button type="button" data-go="signout" class="sn-out">⎋ Sign out</button></aside>
+<div class="mdl" id="productModal" hidden><div class="mdl-card"><h3 id="productFormTitle">Add product</h3>
+ <form id="productForm"><input type="hidden" id="productId">
+  <div class="field"><label for="productName">Product name</label><input id="productName" maxlength="100" placeholder="e.g. Blueberry Cheesecake" required></div>
+  <div class="field"><label for="productPrice">Price (₹)</label><input id="productPrice" type="number" min="0" step="1" placeholder="e.g. 120" required></div>
+  <div class="field"><label for="productCategory">Category</label><select id="productCategory"></select><input id="productCategoryNew" maxlength="50" placeholder="New category name" hidden style="margin-top:8px"></div>
+  <div class="field"><label for="productDesc">Short description (optional)</label><input id="productDesc" maxlength="120" placeholder="e.g. Creamy and smooth"></div>
+  <div class="field"><label>Product photo</label><div class="ph-row"><img id="photoPreview" alt="" hidden><label class="logout photo-btn">📷 Add / change photo<input id="productPhoto" type="file" accept="image/*" hidden></label><button type="button" class="logout" id="removePhotoBtn" hidden>Remove</button></div><small class="muted" id="photoNote">Photo is resized automatically. Without a new photo, the original website photo stays.</small></div>
+  <label class="chk"><input id="productAvailable" type="checkbox" checked> Available for customers</label>
+  <button class="submit" id="saveProductBtn" type="submit">Save product</button><button class="logout" id="cancelEditBtn" type="button" style="margin-top:8px;width:100%">Cancel</button></form></div></div>
+<div class="mdl" id="profileModal" hidden><div class="mdl-card"><h3>Edit profile</h3>
+ <form id="profileForm"><div class="field"><label for="profName">Display name</label><input id="profName" maxlength="60" required></div>
+  <div class="field"><label>Email</label><input id="profEmail" disabled></div>
+  <p class="muted" style="margin:6px 0">Change password (leave blank to keep the current one)</p>
+  <div class="field"><label for="profCur">Current password</label><input id="profCur" type="password" autocomplete="current-password"></div>
+  <div class="field"><label for="profNew">New password</label><input id="profNew" type="password" minlength="6" autocomplete="new-password"></div>
+  <p class="muted" id="profStatus" aria-live="polite"></p>
+  <button class="submit" id="profSave" type="submit">Save changes</button><button class="logout" id="profCancel" type="button" style="margin-top:8px;width:100%">Close</button></form></div></div>
+<div class="toast" id="toast" role="status"></div>
+<div id="orderModal" role="dialog" aria-modal="true" aria-labelledby="omTitle"><div class="om-card" id="omCard"></div></div>
+<script>
+/* Lamp interaction runs independently from Firebase so it also works when this HTML
+   is opened directly from a phone's Downloads folder. */
+(() => {
+  const stage = document.getElementById('stage');
+  const lamp = document.getElementById('lamp');
+  const pull = document.getElementById('pull');
+  const hint = document.getElementById('hint');
+  if (!stage || !lamp || !pull) return;
+
+  let lit = false, dragging = false, startY = 0, moved = false, suppressClick = false;
+  const toggle = () => {
+    lit = !lit;
+    stage.classList.toggle('lit', lit);
+    lamp.classList.toggle('lit', lit);
+    hint.textContent = lit ? 'Tap the cord to turn off' : 'Tap or pull the cord to turn on';
+    pull.setAttribute('aria-label', lit ? 'Turn lamp off' : 'Turn lamp on');
+  };
+
+  pull.addEventListener('click', e => {
+    e.preventDefault();
+    if (suppressClick) { suppressClick = false; return; }
+    toggle();
+  });
+
+  pull.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    dragging = true;
+    moved = false;
+    startY = e.clientY;
+    try { pull.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+
+  pull.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    if (Math.abs(e.clientY - startY) > 7) moved = true;
+    if (e.clientY - startY > 10) lamp.classList.add('pulled');
+  });
+
+  const finishDrag = e => {
+    if (!dragging) return;
+    dragging = false;
+    lamp.classList.remove('pulled');
+    if (moved) {
+      suppressClick = true;
+      toggle();
+    }
+    try { pull.releasePointerCapture(e.pointerId); } catch (_) {}
+  };
+  pull.addEventListener('pointerup', finishDrag);
+  pull.addEventListener('pointercancel', () => {
+    dragging = false;
+    lamp.classList.remove('pulled');
+  });
+
+  // Keyboard accessibility for desktop testing.
+  pull.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggle();
+    }
+  });
+})();
+</script>
+<script>
+/* Guard: if the Firebase module could not load (no internet / CDN blocked / old browser),
+   the form must NOT reload the page silently. Show a clear message instead. */
+(() => {
+  const form = document.getElementById('authForm');
+  const box = document.getElementById('authError');
+  form.addEventListener('submit', e => {
+    if (window.__sweetendAuthReady) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    box.textContent = 'Firebase did not load. Check your internet connection (the page loads Firebase from gstatic.com), turn off any ad-blocker/VPN, and use a modern browser. Then refresh this page.';
+    box.style.display = 'block';
+  }, true);
+})();
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import {
+  getAuth, initializeAuth, onAuthStateChanged, indexedDBLocalPersistence, browserLocalPersistence,
+  browserSessionPersistence, inMemoryPersistence,
+  signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  updateProfile, sendPasswordResetEmail, signOut
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+const firebaseConfig = {
+      apiKey: "AIzaSyCDYnP0kLIihxQ6dJFxiutzb5XmUaEEsiA",
+      authDomain: "sweetend-dashboard.firebaseapp.com",
+      projectId: "sweetend-dashboard",
+      appId: "1:363813613643:web:130f3724fb229da2165dce",
+    };
+const OWNER_EMAIL = "charanmallela40@gmail.com".toLowerCase();
+const app = initializeApp(firebaseConfig);
+// Persistence fallback chain: works on https sites AND when the file is opened directly
+// from a phone/PC (file://), where IndexedDB/localStorage can be blocked.
+let auth;
+try {
+  auth = initializeAuth(app, {
+    persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence]
+  });
+} catch (e) {
+  auth = getAuth(app);
+}
+window.__sweetendAuthReady = true;
+const db = getFirestore(app);
+
+const stage = document.getElementById('stage');
+const lamp = document.getElementById('lamp');
+const pull = document.getElementById('pull');
+const hint = document.getElementById('hint');
+const fireflies = document.getElementById('fireflies');
+for (let i = 0; i < 32; i++) {
+  const f = document.createElement('i');
+  f.className = 'firefly';
+  f.style.left = Math.random() * 100 + '%';
+  f.style.top = Math.random() * 100 + '%';
+  f.style.setProperty('--dur', (5 + Math.random() * 10) + 's');
+  f.style.setProperty('--delay', (-Math.random() * 12) + 's');
+  f.style.setProperty('--dx', (-40 + Math.random() * 80) + 'px');
+  f.style.setProperty('--dy', (-55 + Math.random() * 110) + 'px');
+  fireflies.appendChild(f);
+}
+
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+let mode = 'owner';
+let signup = false;
+
+function updateMode() {
+  signup = mode === 'request';
+  document.getElementById('title').textContent =
+    mode === 'owner' ? 'Owner Login' : mode === 'staff' ? 'Staff Login' : 'Request Staff Access';
+  document.getElementById('subtitle').textContent =
+    mode === 'owner' ? 'Sign in with the existing owner account' :
+    mode === 'staff' ? 'Sign in with an owner-approved staff account' :
+    'Create a staff login and request owner approval';
+  document.getElementById('nameField').hidden = !signup;
+  document.getElementById('name').required = signup;
+  document.getElementById('submitBtn').textContent = signup ? 'Request Access ↗' : 'Sign In ↗';
+  document.getElementById('accessModeNote').textContent =
+    mode === 'owner' ? 'Owner access' : mode === 'staff' ? 'Approved staff access' : 'Staff request only';
+  for (const [id, key] of [['ownerModeBtn','owner'],['staffModeBtn','staff'],['requestModeBtn','request']]) {
+    const b = document.getElementById(id);
+    b.classList.toggle('active', mode === key);
+  }
+}
+document.getElementById('ownerModeBtn').addEventListener('click', () => { mode = 'owner'; updateMode(); });
+document.getElementById('staffModeBtn').addEventListener('click', () => { mode = 'staff'; updateMode(); });
+document.getElementById('requestModeBtn').addEventListener('click', () => { mode = 'request'; updateMode(); });
+document.getElementById('switchMode').addEventListener('click', () => {
+  mode = mode === 'request' ? 'owner' : 'request';
+  updateMode();
+});
+updateMode();
+
+function openDashboard(role, name) {
+  dashboardOpen = true;
+  document.body.dataset.role = role;
+  document.getElementById('welcomeName').textContent = role === 'owner' ? 'Owner' : (name || 'Staff');
+  document.getElementById('roleLabel').textContent = role === 'owner' ? 'Owner workspace' : 'Staff workspace';
+  document.getElementById('stage').style.display = 'none';
+  document.getElementById('dashboardView').style.display = 'block';
+  document.body.style.overflow = 'auto';
+  toast(role === 'owner' ? 'Owner signed in.' : 'Staff signed in.');
+  window.dispatchEvent(new CustomEvent('sweetend:login', { detail: { role } }));
+}
+const isApprovedProfile = p => p.role === 'staff' && p.status !== 'rejected' && (p.status === 'approved' || p.active === true);
+let manualLogin = false, dashboardOpen = false;
+onAuthStateChanged(auth, async user => {
+  if (!user || manualLogin || dashboardOpen) return;
+  try {
+    if ((user.email || '').toLowerCase() === OWNER_EMAIL) { openDashboard('owner'); return; }
+    const snap = await getDoc(doc(db, 'Users', user.uid));
+    const p = snap.exists() ? snap.data() : null;
+    if (p && isApprovedProfile(p)) openDashboard('staff', p.name || user.displayName);
+    else await signOut(auth);
+  } catch (e) { console.error('Session restore failed', e); }
+});
+const pendingProfile = (user, name, email) => ({
+  uid: user.uid,
+  name: name || user.displayName || '', email: email || user.email || '',
+  role: 'staff', status: 'pending', active: false, createdAt: serverTimestamp()
+});
+
+document.getElementById('authForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  const password = document.getElementById('password').value;
+  const name = document.getElementById('name').value.trim();
+  const button = document.getElementById('submitBtn');
+
+  const errBox = document.getElementById('authError');
+  errBox.style.display = 'none'; errBox.textContent = '';
+  const showErr = msg => { errBox.textContent = msg; errBox.style.display = 'block'; toast(msg); };
+  const withTimeout = (p, ms = 20000) => Promise.race([
+    p, new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('timeout'), { code: 'sweetend/timeout' })), ms))
+  ]);
+
+  manualLogin = true;
+  button.disabled = true;
+  button.textContent = mode === 'request' ? 'Creating account…' : 'Signing in…';
+  try {
+    if (mode === 'request') {
+      if (!name) { toast('Enter your full name.'); return; }
+      if (email === OWNER_EMAIL) { toast('This is the owner email. Choose Owner Login instead.'); return; }
+      const credential = await withTimeout(createUserWithEmailAndPassword(auth, email, password));
+      await updateProfile(credential.user, { displayName: name });
+      let saved = true, saveCode = '';
+      try { await setDoc(doc(db, 'Users', credential.user.uid), pendingProfile(credential.user, name, email)); }
+      catch (profileErr) { saved = false; saveCode = profileErr?.code || profileErr?.message || 'unknown'; console.error('[Staff request save failed]', profileErr); }
+      await signOut(auth);
+      mode = 'staff';
+      updateMode();
+      document.getElementById('email').value = email;
+      document.getElementById('password').value = '';
+      if (saved) toast('Request sent. Owner approve chesaka Staff Login tho sign in avvochu.');
+      else showErr('Account created but request NOT saved. Error: ' + saveCode + ' — screenshot teesi naaku pampu. Staff Login tho sign in chesthe malli try chestundi.');
+      return;
+    }
+
+    if (mode === 'owner' && email !== OWNER_EMAIL) {
+      toast('Enter the owner email for Owner Login.');
+      return;
+    }
+    if (mode === 'staff' && email === OWNER_EMAIL) {
+      toast('Use Owner Login for the owner account.');
+      return;
+    }
+
+    const credential = await withTimeout(signInWithEmailAndPassword(auth, email, password));
+    if (mode === 'owner' && (credential.user.email || '').toLowerCase() !== OWNER_EMAIL) {
+      await signOut(auth);
+      toast('Owner access only.');
+      return;
+    }
+    if (mode === 'staff') {
+      const user = credential.user;
+      const ref = doc(db, 'Users', user.uid);
+      let snap;
+      try { snap = await withTimeout(getDoc(ref)); }
+      catch (checkErr) {
+        await signOut(auth);
+        showErr('Approval check failed (' + (checkErr?.code || 'error') + '). firestore.rules publish chesava? Users/{uid} read allow undali.');
+        return;
+      }
+      if (!snap.exists()) {
+        try { await setDoc(ref, pendingProfile(user)); }
+        catch (saveErr) {
+          await signOut(auth);
+          showErr('Could not send your request (' + (saveErr?.code || 'error') + '). Owner must publish the latest firestore.rules in Firebase.');
+          return;
+        }
+        await signOut(auth);
+        showErr('Your staff request has been sent. Owner approve chesaka malli sign in cheyyi.');
+        return;
+      }
+      const p = snap.data();
+      const approved = isApprovedProfile(p);
+      if (!approved) {
+        await signOut(auth);
+        const info = ` [role=${JSON.stringify(p.role)}, status=${JSON.stringify(p.status)}, active=${JSON.stringify(p.active)}]`;
+        if (p.role !== 'staff') showErr('Profile role must be exactly "staff" in Users/' + user.uid + '.' + info);
+        else if (p.status === 'rejected') showErr('Your staff request was rejected by the owner.' + info);
+        else showErr('Waiting for owner approval. Owner Login → Staff access → Approve cheyyali.' + info + ' Users document ID must be exactly: ' + user.uid);
+        return;
+      }
+      openDashboard('staff', p.name || user.displayName);
+      return;
+    }
+    openDashboard('owner');
+  } catch (error) {
+    console.error('[Auth error]', error?.code, error);
+    const code = error?.code || '';
+    let msg;
+    if (code === 'auth/email-already-in-use') msg = 'This email already has an account. Choose Staff Login or reset its password.';
+    else if (code === 'auth/weak-password') msg = 'Choose a stronger password (at least 6 characters).';
+    else if (['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-login-credentials'].includes(code))
+      msg = 'Email or password does not match. Firebase Console → Authentication → Users lo ee email undo leyo check cheyyi, leka "Forgot password?" use chey.';
+    else if (code === 'auth/invalid-email') msg = 'Email format is not valid.';
+    else if (code === 'auth/user-disabled') msg = 'This user is disabled in Firebase Console → Authentication → Users.';
+    else if (code === 'auth/too-many-requests') msg = 'Too many attempts. Wait a few minutes, or reset the password.';
+    else if (code === 'auth/operation-not-allowed') msg = 'Email/Password sign-in is OFF. Firebase Console → Authentication → Sign-in method → Email/Password → Enable.';
+    else if (code === 'auth/unauthorized-domain') msg = 'This domain is not authorized. Firebase Console → Authentication → Settings → Authorized domains lo "' + location.hostname + '" add chey.';
+    else if (code === 'auth/network-request-failed') msg = 'Network error. Check internet / VPN / ad-blocker and try again.';
+    else if (code === 'sweetend/timeout') msg = 'Sign-in is taking too long (no response from Firebase). Check internet, and the API key restrictions in Google Cloud Console.';
+    else if (code === 'auth/operation-not-supported-in-this-environment') msg = 'This browser/environment is not supported when opening the file directly. Host the page on https (Firebase Hosting / Netlify / GitHub Pages) or use localhost.';
+    else if (code.includes('api-key') || code.includes('referer') || code.includes('app-not-authorized'))
+      msg = 'Firebase API key is blocked or invalid for this site. Google Cloud Console → APIs & Services → Credentials → your Browser key → allow this website (or remove the restriction) and make sure "Identity Toolkit API" is allowed. [' + code + ']';
+    else msg = (mode === 'request' ? 'Could not create account. ' : 'Login failed. ') + 'Error code: ' + (code || error?.message || 'unknown');
+    showErr(msg);
+  } finally {
+    manualLogin = false;
+    button.disabled = false;
+    button.textContent = mode === 'request' ? 'Request Access ↗' : 'Sign In ↗';
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  try { await signOut(auth); } catch (error) {}
+  document.body.removeAttribute('data-role');
+  dashboardOpen = false;
+  window.dispatchEvent(new CustomEvent('sweetend:logout'));
+  document.getElementById('dashboardView').style.display = 'none';
+  document.getElementById('stage').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  toast('Signed out.');
+});
+
+document.getElementById('forgot').addEventListener('click', async e => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  if (!email) { toast('Enter your email first, then tap Forgot password.'); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    toast('If this email is registered, a password reset email will be sent.');
+  } catch (error) {
+    toast('Could not send reset email. Check the email and Firebase settings.');
+  }
+});
+</script>
+
+<script type="module">
+// Separate product-test module. The original v3 authentication module above is intentionally unchanged.
+import { getApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+import {
+  getFirestore, collection, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, where, limit, orderBy
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+const app = getApp();
+const auth = getAuth(app);
+const db = getFirestore(app);
+const diag = () => ` [project=${app.options.projectId}, signedInAs=${auth.currentUser?.email || 'nobody'}]`;
+const dashboard = document.getElementById('dashboardView');
+const SEED = [{"id": "menu--classic-cheesecake", "name": "Classic Cheesecake", "price": 100, "category": "menu", "categoryLabel": "Cheesecake Collection", "desc": "Classic, creamy and smooth."}, {"id": "menu--mango-cheesecake", "name": "Mango Cheesecake", "price": 120, "category": "menu", "categoryLabel": "Cheesecake Collection", "desc": "Fresh mango cheesecake."}, {"id": "menu--biscoff-cheesecake", "name": "Biscoff Cheesecake", "price": 129, "category": "menu", "categoryLabel": "Cheesecake Collection", "desc": "Creamy cheesecake with Biscoff."}, {"id": "menu--oreo-cheesecake", "name": "Oreo Cheesecake", "price": 140, "category": "menu", "categoryLabel": "Cheesecake Collection", "desc": "Rich Oreo cheesecake."}, {"id": "menu--blueberry-cheesecake", "name": "Blueberry Cheesecake", "price": 150, "category": "menu", "categoryLabel": "Cheesecake Collection", "desc": "Blueberry topping with creamy cheesecake."}, {"id": "menu--red-velvet-cheesecake", "name": "Red Velvet Cheesecake", "price": 130, "category": "menu", "categoryLabel": "Cheesecake Collection", "desc": "Red velvet layers with cheesecake cream."}, {"id": "menu--strawberry-cheesecake", "name": "Strawberry Cheesecake", "price": 130, "category": "menu", "categoryLabel": "Cheesecake Collection", "desc": "Fresh strawberry cheesecake."}, {"id": "tom-jerry--strawberry-cheesecake", "name": "Strawberry Cheesecake", "price": 120, "category": "tom-jerry", "categoryLabel": "Tom & Jerry Cheesecake", "desc": ""}, {"id": "tom-jerry--blueberry-cheesecake", "name": "Blueberry Cheesecake", "price": 120, "category": "tom-jerry", "categoryLabel": "Tom & Jerry Cheesecake", "desc": ""}, {"id": "tom-jerry--pistachio-cheesecake", "name": "Pistachio Cheesecake", "price": 120, "category": "tom-jerry", "categoryLabel": "Tom & Jerry Cheesecake", "desc": ""}, {"id": "tom-jerry--mango-cheesecake", "name": "Mango Cheesecake", "price": 120, "category": "tom-jerry", "categoryLabel": "Tom & Jerry Cheesecake", "desc": ""}, {"id": "jar-cakes--tropical-tango-jarcake", "name": "Tropical Tango Jarcake", "price": 70, "category": "jar-cakes", "categoryLabel": "Jar Cakes", "desc": ""}, {"id": "jar-cakes--red-velvet-jarcake", "name": "Red Velvet Jarcake", "price": 70, "category": "jar-cakes", "categoryLabel": "Jar Cakes", "desc": ""}, {"id": "jar-cakes--chocolate-jarcake", "name": "Chocolate Jarcake", "price": 70, "category": "jar-cakes", "categoryLabel": "Jar Cakes", "desc": ""}, {"id": "jar-cakes--nawabi-jarcake", "name": "Nawabi Jarcake", "price": 70, "category": "jar-cakes", "categoryLabel": "Jar Cakes", "desc": ""}, {"id": "tres-leches--rose-milk-tres-leches", "name": "Rose Milk Tres Leches", "price": 129, "category": "tres-leches", "categoryLabel": "Premium Tres Leches", "desc": ""}, {"id": "tres-leches--pistachio-tres-leches", "name": "Pistachio Tres Leches", "price": 129, "category": "tres-leches", "categoryLabel": "Premium Tres Leches", "desc": ""}, {"id": "tres-leches--chocolate-tres-leches", "name": "Chocolate Tres Leches", "price": 129, "category": "tres-leches", "categoryLabel": "Premium Tres Leches", "desc": ""}, {"id": "desserts--arabian-dessert", "name": "Arabian Dessert", "price": 129, "category": "desserts", "categoryLabel": "Signature Desserts", "desc": ""}, {"id": "desserts--apricot-delight", "name": "Apricot Delight", "price": 139, "category": "desserts", "categoryLabel": "Signature Desserts", "desc": ""}, {"id": "mango--mango-cheesecake", "name": "Mango Cheesecake", "price": 130, "category": "mango", "categoryLabel": "Mango Festival", "desc": ""}, {"id": "mango--mango-delight", "name": "Mango Delight", "price": 140, "category": "mango", "categoryLabel": "Mango Festival", "desc": ""}, {"id": "mango--mango-tres-leches", "name": "Mango Tres Leches", "price": 140, "category": "mango", "categoryLabel": "Mango Festival", "desc": ""}, {"id": "strawberry--triple-chocolate", "name": "Triple Chocolate", "price": 120, "category": "strawberry", "categoryLabel": "Seasonal Strawberry", "desc": ""}, {"id": "strawberry--sticks", "name": "Sticks", "price": 90, "category": "strawberry", "categoryLabel": "Seasonal Strawberry", "desc": ""}, {"id": "tub-cakes--kunafa-tub-cake", "name": "Kunafa Tub Cake", "price": 140, "category": "tub-cakes", "categoryLabel": "Tub Cakes", "desc": ""}, {"id": "tub-cakes--chocolate-tub-cake", "name": "Chocolate Tub Cake", "price": 130, "category": "tub-cakes", "categoryLabel": "Tub Cakes", "desc": ""}, {"id": "viral--dream-cake", "name": "Dream Cake", "price": 360, "category": "viral", "categoryLabel": "Viral Desserts", "desc": ""}, {"id": "viral--cookie-tin", "name": "Cookie Tin", "price": 450, "category": "viral", "categoryLabel": "Viral Desserts", "desc": ""}, {"id": "viral--crunch-cake", "name": "Crunch Cake", "price": 400, "category": "viral", "categoryLabel": "Viral Desserts", "desc": ""}, {"id": "sweetend-special--kinder-bueno", "name": "Kinder Bueno", "price": 650, "category": "sweetend-special", "categoryLabel": "Sweetend Special Dessert", "desc": ""}];
+const $ = id => document.getElementById(id);
+const productsList = $('productsList'), productStatus = $('productStatus'), productCount = $('productCount'), productConnection = $('productConnection');
+const productModal = $('productModal'), productForm = $('productForm');
+let loadedProducts = [], busy = false, photoData;   // photoData: undefined = unchanged, '' = removed, 'data:' = new
+const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function safeText(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function showStatus(message, isError=false) {
+  productStatus.textContent = message;
+  productStatus.style.color = isError ? '#ff9b86' : '#c3b79b';
+  productConnection.textContent = isError ? 'Permission/error' : 'Connected';
+  productConnection.style.color = isError ? '#ff9b86' : '#ffcf65';
+}
+function categories() {
+  const m = new Map(); SEED.forEach(s => m.set(s.category, s.categoryLabel));
+  loadedProducts.forEach(p => { if (p.data.category && !m.has(p.data.category)) m.set(p.data.category, p.data.categoryLabel || p.data.category); });
+  return m;
+}
+function fillCats() {
+  const cats = categories(), cur = $('menuCat').value, pc = $('productCategory');
+  $('menuCat').innerHTML = '<option value="">All categories</option>' + [...cats].map(([k, v]) => `<option value="${safeText(k)}">${safeText(v)}</option>`).join('');
+  $('menuCat').value = cats.has(cur) ? cur : '';
+  pc.innerHTML = [...cats].map(([k, v]) => `<option value="${safeText(k)}">${safeText(v)}</option>`).join('') + '<option value="__new__">＋ New category…</option>';
+}
+$('productCategory').addEventListener('change', e => { $('productCategoryNew').hidden = e.target.value !== '__new__'; });
+function setPhotoUI(src) {
+  const img = $('photoPreview'); img.hidden = !src; if (src) img.src = src; $('removePhotoBtn').hidden = !src;
+}
+function openProductModal(item) {
+  fillCats(); photoData = undefined; $('productPhoto').value = '';
+  const d = item ? item.data : {};
+  $('productId').value = item ? item.id : '';
+  $('productName').value = d.name || ''; $('productPrice').value = d.price ?? ''; $('productDesc').value = d.desc || '';
+  $('productAvailable').checked = d.available !== false;
+  $('productCategory').value = d.category || SEED[0].category; $('productCategoryNew').hidden = true; $('productCategoryNew').value = '';
+  setPhotoUI(d.photo || '');
+  $('productFormTitle').textContent = item ? 'Edit product' : 'Add product';
+  $('saveProductBtn').textContent = item ? 'Update product' : 'Save product';
+  productModal.hidden = false; $('productName').focus();
+}
+const closeProductModal = () => { productModal.hidden = true; };
+function compress(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      let max = 720, q = 0.82, out = '';
+      for (let i = 0; i < 5; i++) {
+        const s = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        out = c.toDataURL('image/webp', q); if (!out.startsWith('data:image/webp')) out = c.toDataURL('image/jpeg', q);
+        if (out.length < 300000) break; q -= 0.1; max -= 100;
+      }
+      URL.revokeObjectURL(url); out.length < 700000 ? resolve(out) : reject(new Error('Image too large'));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Not an image')); };
+    img.src = url;
+  });
+}
+$('productPhoto').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { photoData = await compress(f); setPhotoUI(photoData); } catch (err) { showStatus('Photo failed: ' + err.message, true); }
+});
+$('removePhotoBtn').addEventListener('click', () => { photoData = ''; $('productPhoto').value = ''; setPhotoUI(''); });
+function renderProducts() {
+  productsList.replaceChildren();
+  const q = $('menuSearch').value.trim().toLowerCase(), cat = $('menuCat').value;
+  const rows = loadedProducts.filter(p => (!cat || p.data.category === cat) && (!q || String(p.data.name || '').toLowerCase().includes(q)));
+  if (!rows.length) {
+    const p = document.createElement('p'); p.className = 'muted';
+    p.textContent = loadedProducts.length ? 'No products match your search.' : 'No products yet. Tap “Import website menu” to load the existing menu, or “Add product”.';
+    productsList.appendChild(p); return;
+  }
+  for (const item of rows) {
+    const d = item.data, row = document.createElement('div'); row.className = 'product-row';
+    const th = d.photo ? Object.assign(document.createElement('img'), {className: 'pr-thumb', alt: '', src: d.photo}) : Object.assign(document.createElement('div'), {className: 'pr-thumb', textContent: '🍰'});
+    const info = document.createElement('div'); info.style.cssText = 'flex:1;min-width:0;overflow-wrap:anywhere';
+    info.innerHTML = `<strong>${safeText(d.name || 'Unnamed')}</strong><div class="muted">${safeText(d.categoryLabel || d.category || 'Uncategorised')}</div><div style="color:#ffcf65">₹${safeText(d.price ?? 0)}</div>` +
+      `<label class="pr-av"><input type="checkbox" ${d.available === false ? '' : 'checked'}> <span style="color:${d.available === false ? '#ff9b86' : '#9be8a8'}">${d.available === false ? 'Not available' : 'Available'}</span></label>`;
+    info.querySelector('input').addEventListener('change', async e => {
+      try { await updateDoc(doc(db, 'Products', item.id), {available: e.target.checked, updatedAt: serverTimestamp()}); d.available = e.target.checked; renderProducts(); }
+      catch (err) { e.target.checked = !e.target.checked; showStatus(`Update failed (${err?.code || 'unknown'}).`, true); }
+    });
+    const acts = document.createElement('div'); acts.style.cssText = 'display:flex;flex-direction:column;gap:6px;flex-shrink:0';
+    const edit = Object.assign(document.createElement('button'), {type: 'button', className: 'logout', textContent: 'Edit'});
+    edit.addEventListener('click', () => openProductModal(item)); acts.appendChild(edit);
+    if (!d.seed) {
+      const del = Object.assign(document.createElement('button'), {type: 'button', className: 'logout', textContent: 'Delete'});
+      del.addEventListener('click', async () => {
+        if (!confirm(`Delete “${d.name || 'this product'}”? It disappears from the website.`)) return;
+        try { await deleteDoc(doc(db, 'Products', item.id)); await loadProducts(); showStatus('Product deleted.'); }
+        catch (err) { showStatus(`Delete failed (${err?.code || 'unknown'}).`, true); }
+      }); acts.appendChild(del);
+    }
+    row.append(th, info, acts); productsList.appendChild(row);
+  }
+}
+async function loadProducts() {
+  showStatus('Loading products…');
+  try {
+    const snap = await getDocs(collection(db, 'Products'));
+    loadedProducts = snap.docs.map(x => ({id: x.id, data: x.data()}));
+    const order = new Map(SEED.map((s, i) => [s.id, i]));
+    loadedProducts.sort((a, b) => (order.get(a.id) ?? 999) - (order.get(b.id) ?? 999) || String(a.data.name).localeCompare(String(b.data.name)));
+    setNum('productCount', loadedProducts.length); fillCats(); renderProducts();
+    showStatus(`${loadedProducts.length} product(s) loaded.`);
+  } catch (error) {
+    console.error('Product read failed', error); productCount.textContent = '—'; loadedProducts = []; renderProducts();
+    showStatus(`Products read failed (${error?.code || 'unknown'}). Publish the latest firestore.rules.`, true);
+  }
+}
+productForm.addEventListener('submit', async event => {
+  event.preventDefault(); if (busy) return;
+  const name = $('productName').value.trim(), price = Number($('productPrice').value), id = $('productId').value;
+  let category = $('productCategory').value, label = categories().get(category) || '';
+  if (category === '__new__') { label = $('productCategoryNew').value.trim(); category = slug(label); }
+  if (!name || !category || !label || !Number.isFinite(price) || price < 0) { showStatus('Enter a valid name, category and price.', true); return; }
+  const btn = $('saveProductBtn'); busy = true; btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const data = {name, price, category, categoryLabel: label, desc: $('productDesc').value.trim(), available: $('productAvailable').checked, updatedAt: serverTimestamp()};
+    if (photoData !== undefined) data.photo = photoData;
+    if (id) await updateDoc(doc(db, 'Products', id), data);
+    else await addDoc(collection(db, 'Products'), {photo: '', ...data, seed: false, createdAt: serverTimestamp()});
+    closeProductModal(); await loadProducts(); showStatus(id ? 'Product updated. Website updates automatically.' : 'Product added. It now appears on the website.');
+  } catch (error) {
+    console.error('Product save failed', error); showStatus(`Save failed (${error?.code || 'unknown'}). ${error?.code === 'invalid-argument' ? 'Photo may be too large.' : 'Check Firestore rules.'}`, true);
+  } finally { busy = false; btn.disabled = false; }
+});
+$('cancelEditBtn').addEventListener('click', closeProductModal);
+productModal.addEventListener('click', e => { if (e.target === productModal) closeProductModal(); });
+$('addProductBtn').addEventListener('click', () => openProductModal(null));
+$('reloadProductsBtn').addEventListener('click', loadProducts);
+$('menuSearch').addEventListener('input', renderProducts); $('menuCat').addEventListener('change', renderProducts);
+$('importMenuBtn').addEventListener('click', async () => {
+  const have = new Set(loadedProducts.map(p => p.id)), todo = SEED.filter(s => !have.has(s.id));
+  if (!todo.length) { showStatus('Website menu is already imported.'); return; }
+  if (!confirm(`Import ${todo.length} existing website products so you can edit them here?`)) return;
+  showStatus('Importing…');
+  try {
+    await Promise.all(todo.map(s => setDoc(doc(db, 'Products', s.id), {name: s.name, price: s.price, category: s.category, categoryLabel: s.categoryLabel, desc: s.desc, photo: '', available: true, seed: true, createdAt: serverTimestamp(), updatedAt: serverTimestamp()})));
+    await loadProducts(); showStatus(`Imported ${todo.length} products. You can now edit them.`);
+  } catch (err) { showStatus(`Import failed (${err?.code || 'unknown'}). Publish the latest firestore.rules.`, true); }
+});
+
+// ===================== Side menu + profile =====================
+const sideNav = $('sideNav'), scrim = $('navScrim'), burger = $('burgerBtn');
+const toggleNav = open => { sideNav.classList.toggle('open', open); scrim.classList.toggle('open', open); burger.setAttribute('aria-expanded', String(open)); };
+burger.addEventListener('click', () => toggleNav(!sideNav.classList.contains('open')));
+scrim.addEventListener('click', () => toggleNav(false));
+[['ordersList', 'secOrders'], ['staffList', 'secStaff'], ['checkList', 'secCheck']].forEach(([c, id]) => { const s = $(c)?.closest('.dash-section'); if (s) s.id = id; });
+sideNav.addEventListener('click', e => {
+  const b = e.target.closest('button[data-go]'); if (!b) return; const g = b.dataset.go; toggleNav(false);
+  if (g === 'signout') $('logoutBtn').click();
+  else if (g === 'profile') openProfile();
+  else if (g === 'top') window.scrollTo({top: 0, behavior: 'smooth'});
+  else $(g)?.scrollIntoView({behavior: 'smooth', block: 'start'});
+});
+function paintUser() {
+  const u = auth.currentUser; if (!u) return;
+  $('navName').textContent = u.displayName || u.email; $('navMeta').textContent = `${u.email} · ${currentRole || ''}`;
+  if (u.displayName) { const w = $('welcomeName'); if (w) w.textContent = u.displayName; }
+}
+const profModal = $('profileModal');
+function openProfile() { const u = auth.currentUser; if (!u) return; $('profName').value = u.displayName || ''; $('profEmail').value = u.email || ''; $('profCur').value = ''; $('profNew').value = ''; $('profStatus').textContent = ''; profModal.hidden = false; }
+$('profCancel').addEventListener('click', () => { profModal.hidden = true; });
+profModal.addEventListener('click', e => { if (e.target === profModal) profModal.hidden = true; });
+$('profileForm').addEventListener('submit', async e => {
+  e.preventDefault(); const u = auth.currentUser, st = $('profStatus'), name = $('profName').value.trim(), np = $('profNew').value, cp = $('profCur').value;
+  const say = (m, bad) => { st.textContent = m; st.style.color = bad ? '#ff9b86' : '#9be8a8'; };
+  if (!u || !name) return say('Enter your name.', true);
+  if (np && np.length < 6) return say('New password must be at least 6 characters.', true);
+  if (np && !cp) return say('Enter your current password to change it.', true);
+  $('profSave').disabled = true;
+  try {
+    if (np) { await reauthenticateWithCredential(u, EmailAuthProvider.credential(u.email, cp)); await updatePassword(u, np); }
+    if (name !== (u.displayName || '')) { await updateProfile(u, {displayName: name}); try { await updateDoc(doc(db, 'Users', u.uid), {name}); } catch (x) { console.warn('Profile doc not updated', x?.code); } }
+    paintUser(); say(np ? 'Profile and password updated.' : 'Profile updated.');
+  } catch (err) {
+    const c = err?.code || ''; say(/wrong-password|invalid-credential/.test(c) ? 'Current password is incorrect.' : /requires-recent/.test(c) ? 'Please sign in again, then retry.' : `Could not save (${c || 'error'}).`, true);
+  } finally { $('profSave').disabled = false; }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { toggleNav(false); closeProductModal(); profModal.hidden = true; } });
+
+// ===================== V7: Orders & Sales =====================
+const ordersList = document.getElementById('ordersList');
+const ordersStatus = document.getElementById('ordersStatus');
+const ORDER_STATUSES = ['new', 'confirmed', 'delivered', 'cancelled'];
+const SALE_STATUSES = ['confirmed', 'delivered'];   // only these count as sales
+let currentRole = null;
+let loadedOrders = [];
+let ordersLoaded = false;
+
+const money = n => '₹' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+function orderTotal(d) {
+  const n = Number(d.total ?? d.totalAmount ?? d.grandTotal ?? d.amount ?? d.totalPrice);
+  if (Number.isFinite(n)) return n;
+  if (Array.isArray(d.items)) return d.items.reduce((sum, i) => sum + (Number(i.price) || 0) * (Number(i.qty ?? i.quantity ?? 1) || 1), 0);
+  return 0;
+}
+function orderDate(d) {
+  const t = d.createdAt ?? d.timestamp ?? d.orderDate ?? d.date;
+  if (t && typeof t.toDate === 'function') return t.toDate();
+  if (typeof t === 'number') return new Date(t);
+  if (typeof t === 'string') { const x = new Date(t); return isNaN(x) ? null : x; }
+  return null;
+}
+const itemCount = d => Array.isArray(d.items) ? d.items.reduce((s, i) => s + (Number(i.qty ?? i.quantity ?? 1) || 1), 0) : 0;
+function orderItemsText(d) {
+  if (Array.isArray(d.items) && d.items.length)
+    return d.items.map(i => `${i.qty ?? i.quantity ?? 1}× ${i.name ?? i.title ?? 'item'}`).join(', ');
+  return String(d.item ?? d.product ?? '');
+}
+/* ===== Premium count-up: starts from a random number and rolls to the real value ===== */
+const REDUCE = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const NUMFMT = { int: v => String(Math.round(v)), money: v => money(Math.round(v)), compact: v => compactMoney(v), dec1: v => (Math.round(v * 10) / 10).toFixed(1) };
+function setNum(id, target, fmt = 'int') {
+  const el = document.getElementById(id); if (!el) return;
+  const f = NUMFMT[fmt]; target = Number(target) || 0;
+  cancelAnimationFrame(el._raf);
+  const first = el._val === undefined || el.textContent.trim() === '—';
+  if (REDUCE || (!first && el._val === target)) { el.textContent = f(target); el._val = target; el.classList.remove('counting'); return; }
+  let from = first ? (target < 10 ? Math.floor(Math.random() * 14) : Math.floor(Math.random() * target * 0.85)) : el._val;
+  if (first && from === target) from = target + 3;
+  const dur = first ? 1900 : 700, t0 = performance.now();
+  el.classList.add('counting');
+  const tick = now => {
+    const p = Math.min(1, (now - t0) / dur), e = p >= 1 ? 1 : 1 - Math.pow(2, -10 * p);   // easeOutExpo
+    const v = from + (target - from) * e;
+    el.textContent = f(v); el._val = v;
+    if (p < 1) el._raf = requestAnimationFrame(tick); else { el._val = target; el.classList.remove('counting'); }
+  };
+  el._raf = requestAnimationFrame(tick);
+}
+const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+const compactMoney = n => { n = Number(n || 0); const f = (v, u) => '₹' + (v).toFixed(1).replace(/\.0$/, '') + u; return n >= 1e7 ? f(n / 1e7, 'Cr') : n >= 1e5 ? f(n / 1e5, 'L') : n >= 1e3 ? f(n / 1e3, 'K') : '₹' + Math.round(n); };
+function setStatusText(el, msg, isError) { el.textContent = msg; el.style.color = isError ? '#ff9b86' : '#c3b79b'; }
+
+const pad2 = n => String(n).padStart(2, '0');
+const ymd = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+const startOfDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const startOfWeek = d => { const x = startOfDay(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };  // Monday
+const fmtDay = d => d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+let range = { from: null, to: null, label: 'Today' }, groupMode = 'day';
+const isValid = o => o.status !== 'cancelled';
+const isSale = o => isValid(o) && (o.data.paymentStatus === 'paid' || SALE_STATUSES.includes(o.status));
+
+function setPreset(name) {
+  const now = new Date(), t = startOfDay(now); let from = t, to = t, label = 'Today';
+  if (name === 'yesterday') { from = new Date(t); from.setDate(from.getDate() - 1); to = from; label = 'Yesterday'; }
+  else if (name === 'week') { from = startOfWeek(now); label = 'This week'; }
+  else if (name === 'month') { from = new Date(t.getFullYear(), t.getMonth(), 1); label = 'This month'; }
+  else if (name === 'all') { from = null; to = null; label = 'All orders'; }
+  document.getElementById('fromDate').value = from ? ymd(from) : '';
+  document.getElementById('toDate').value = to ? ymd(to) : '';
+  applyRange(label, name);
+}
+function applyRange(label, preset) {
+  const f = document.getElementById('fromDate').value, t = document.getElementById('toDate').value;
+  const from = f ? new Date(f + 'T00:00:00') : null, to = t ? new Date(t + 'T23:59:59.999') : null;
+  if (from && to && from > to) { setStatusText(ordersStatus, '"From" date must be on or before "To" date.', true); return; }
+  range = { from, to, label: label || 'Custom range' };
+  document.querySelectorAll('#rangeChips .chip').forEach(c => c.classList.toggle('active', c.dataset.preset === preset));
+  renderOrders();
+}
+
+// ===================== V9: order details =====================
+const pick = (...v) => v.find(x => x !== undefined && x !== null && x !== '');
+const orderCode = o => String(pick(o.data.orderId, o.data.orderNumber, o.id.slice(0, 6).toUpperCase()));
+const orderCustomer = d => ({
+  name: pick(d.customerName, d.name, d.customer?.name, 'Customer'),
+  phone: String(pick(d.phone, d.customerPhone, d.customer?.phone, '')),
+  email: String(pick(d.email, d.customerEmail, d.customer?.email, '')),
+  address: (() => { const a = pick(d.address, d.deliveryAddress, d.customer?.address, ''); return a && typeof a === 'object' ? Object.values(a).filter(Boolean).join(', ') : String(a); })(),
+  notes: String(pick(d.notes, d.note, d.instructions, d.message, ''))
+});
+const orderModal = document.getElementById('orderModal');
+const omCard = document.getElementById('omCard');
+function closeOrderModal() { orderModal.classList.remove('open'); }
+orderModal.addEventListener('click', e => { if (e.target === orderModal) closeOrderModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOrderModal(); });
+function openOrderModal(o) {
+  const d = o.data, c = orderCustomer(d), code = orderCode(o);
+  const items = Array.isArray(d.items) ? d.items : [];
+  const rows = items.length ? items.map(i => {
+    const q = Number(i.qty ?? i.quantity ?? 1) || 1, pr = Number(i.price) || 0;
+    return `<tr><td>${safeText(i.name ?? i.title ?? 'item')}</td><td>${q}</td><td>${safeText(money(pr))}</td><td>${safeText(money(pr * q))}</td></tr>`;
+  }).join('') : `<tr><td colspan="4">${safeText(orderItemsText(d) || 'No item details saved')}</td></tr>`;
+  const paid = d.paymentStatus === 'paid';
+  const payId = pick(d.paymentId, d.razorpayPaymentId, d.transactionId, '');
+  const tel = c.phone.replace(/[^\d+]/g, '');
+  const grid = [
+    ['Name', safeText(c.name)],
+    ['Phone', c.phone ? `<a href="tel:${safeText(tel)}">${safeText(c.phone)}</a>` : '—'],
+    c.email ? ['Email', safeText(c.email)] : null,
+    c.address ? ['Address', safeText(c.address)] : null,
+    c.notes ? ['Notes', safeText(c.notes)] : null
+  ].filter(Boolean).map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join('');
+  const pay = [
+    ['Payment', paid ? '<span class="badge approved" style="margin:0">Paid</span>' : `<span class="badge pending" style="margin:0">${safeText(d.paymentStatus || 'Not paid')}</span>`],
+    d.paymentMethod ? ['Method', safeText(d.paymentMethod)] : null,
+    payId ? ['Payment ID', safeText(payId)] : null,
+    ['Order status', safeText(o.status)],
+    ['Placed', o.date ? safeText(o.date.toLocaleString('en-IN')) : '—']
+  ].filter(Boolean).map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join('');
+  omCard.innerHTML = `
+    <div class="om-head"><div><h4 id="omTitle">Order #${safeText(code)}</h4><div class="om-sub">Ref: ${safeText(o.id)}</div></div><button class="om-x" type="button" id="omClose" aria-label="Close">×</button></div>
+    <div class="om-sec"><small>Customer</small><div class="om-grid">${grid}</div></div>
+    <div class="om-sec"><small>Items</small><table class="om-items"><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="om-total" style="border:0;margin-top:4px;padding-top:0;font-size:13px;color:#b9a77a"><span>Total items</span><b>${itemCount(d)}</b></div>
+      <div class="om-total"><span>Order total</span><b>${safeText(money(o.total))}</b></div></div>
+    <div class="om-sec"><small>Payment &amp; status</small><div class="om-grid">${pay}</div></div>
+    <div class="om-btns">${tel ? `<a class="logout" style="text-decoration:none;display:inline-block" href="tel:${safeText(tel)}">Call customer</a>` : ''}<button class="logout" type="button" id="omCopy">Copy order ID</button></div>`;
+  omCard.querySelector('#omClose').addEventListener('click', closeOrderModal);
+  omCard.querySelector('#omCopy').addEventListener('click', async e => {
+    try { await navigator.clipboard.writeText(code); e.target.textContent = 'Copied ✓'; } catch { e.target.textContent = code; }
+  });
+  orderModal.classList.add('open');
+}
+let orderQuery = '';
+document.getElementById('orderSearch').addEventListener('input', e => { orderQuery = e.target.value.trim().toLowerCase(); renderOrders(); });
+const matchesQuery = o => {
+  if (!orderQuery) return true;
+  const c = orderCustomer(o.data);
+  return [orderCode(o), o.id, c.name, c.phone, orderItemsText(o.data)].join(' ').toLowerCase().includes(orderQuery);
+};
+
+// ===================== Premium insights: weekly bar graph + calendar =====================
+const DAYMS = 86400000, WD = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const shortD = d => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+let selDay = startOfDay(new Date()), weekOffset = 0, calMonth = new Date(selDay.getFullYear(), selDay.getMonth(), 1);
+function dayMap() {
+  const m = new Map();
+  for (const o of loadedOrders) {
+    if (!o.date || !isValid(o)) continue;
+    const k = ymd(o.date), e = m.get(k) || { n: 0, sales: 0 };
+    e.n++; if (isSale(o)) e.sales += o.total; m.set(k, e);
+  }
+  return m;
+}
+function selectDay(d) {
+  const t = startOfDay(new Date()); selDay = startOfDay(d); if (selDay > t) selDay = t;
+  weekOffset = Math.round((startOfWeek(selDay) - startOfWeek(t)) / (7 * DAYMS));
+  calMonth = new Date(selDay.getFullYear(), selDay.getMonth(), 1);
+  renderInsights();
+}
+const resetInsights = () => selectDay(new Date());
+function renderInsights() {
+  const stats = dayMap(), today = startOfDay(new Date()), tk = ymd(today), sk = ymd(selDay);
+  const ws = addDays(startOfWeek(today), weekOffset * 7), days = [0,1,2,3,4,5,6].map(i => addDays(ws, i));
+  const cnt = days.map(d => stats.get(ymd(d))?.n || 0), total = cnt.reduce((a, b) => a + b, 0), max = Math.max(1, ...cnt);
+  const sales = days.reduce((a, d) => a + (stats.get(ymd(d))?.sales || 0), 0);
+  let prev = 0; for (let i = 1; i <= 7; i++) prev += stats.get(ymd(addDays(ws, -i)))?.n || 0;
+  document.querySelectorAll('#wkBars .bar-col').forEach((col, i) => {
+    const d = days[i], k = ymd(d), c = cnt[i];
+    col.dataset.d = k;
+    col.classList.toggle('sel', k === sk); col.classList.toggle('today', k === tk); col.classList.toggle('future', d > today);
+    col.querySelector('.bar-pct').textContent = total ? Math.round(c / total * 100) + '%' : '0%';
+    col.querySelector('.bar').style.height = ordersLoaded && c ? Math.max(8, c / max * 100) + '%' : '3px';
+    col.querySelector('.bar-day').innerHTML = WD[i] + '<small>' + d.getDate() + '</small>';
+    col.setAttribute('aria-label', `${shortD(d)}: ${c} orders`);
+  });
+  $('wkLabel').textContent = weekOffset === 0 ? 'This week' : weekOffset === -1 ? 'Last week' : Math.abs(weekOffset) + ' weeks ago';
+  $('wkRange').textContent = shortD(ws) + ' – ' + shortD(addDays(ws, 6));
+  $('wkNext').disabled = weekOffset >= 0;
+  if (ordersLoaded) { setNum('wkTotal', total); setNum('wkAvg', total / 7, 'dec1'); setNum('wkSales', sales, 'money'); }
+  const vs = $('wkVs');
+  if (!ordersLoaded || (!prev && !total)) { vs.textContent = '—'; vs.className = ''; }
+  else if (!prev) { vs.textContent = 'New'; vs.className = 'up'; }
+  else { const ch = Math.round((total - prev) / prev * 100); vs.textContent = (ch > 0 ? '▲ +' : ch < 0 ? '▼ ' : '') + ch + '%'; vs.className = ch >= 0 ? 'up' : 'down'; }
+  const s = stats.get(sk) || { n: 0, sales: 0 }, pct = total ? Math.round(s.n / total * 100) : 0;
+  $('dayDetailText').innerHTML = `<b>${safeText(selDay.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' }))}</b> · ${s.n} order(s) · ${pct}% of the week<span data-owner-only> · ${safeText(money(s.sales))}</span>`;
+  // calendar
+  const y = calMonth.getFullYear(), m = calMonth.getMonth(), lead = (calMonth.getDay() + 6) % 7, dim = new Date(y, m + 1, 0).getDate();
+  $('calTitle').textContent = calMonth.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  let mx = 1; for (let d = 1; d <= dim; d++) mx = Math.max(mx, stats.get(ymd(new Date(y, m, d)))?.n || 0);
+  const wsK = ymd(ws), weK = ymd(addDays(ws, 6));
+  let h = WD.map(w => `<div class="cal-wd">${w[0]}</div>`).join('') + '<div class="cal-day empty"></div>'.repeat(lead);
+  for (let d = 1; d <= dim; d++) {
+    const dt = new Date(y, m, d), k = ymd(dt), n = stats.get(k)?.n || 0;
+    h += `<button type="button" class="cal-day${k === sk ? ' sel' : ''}${k === tk ? ' today' : ''}${k >= wsK && k <= weK ? ' inweek' : ''}${dt > today ? ' future' : ''}" data-d="${k}" style="--i:${(n / mx).toFixed(2)}" aria-label="${safeText(shortD(dt))}: ${n} orders">${d}${n ? `<i>${n}</i>` : ''}</button>`;
+  }
+  $('calGrid').innerHTML = h;
+  $('calNext').disabled = y === today.getFullYear() && m === today.getMonth();
+}
+const parseDay = k => new Date(k + 'T00:00:00');
+$('wkPrev').addEventListener('click', () => selectDay(addDays(selDay, -7)));
+$('wkNext').addEventListener('click', () => { if (weekOffset < 0) selectDay(addDays(selDay, 7)); });
+$('wkBars').addEventListener('click', e => { const c = e.target.closest('.bar-col'); if (c && c.dataset.d && !c.classList.contains('future')) selectDay(parseDay(c.dataset.d)); });
+$('calGrid').addEventListener('click', e => { const b = e.target.closest('.cal-day[data-d]'); if (b && !b.classList.contains('future')) selectDay(parseDay(b.dataset.d)); });
+$('calPrev').addEventListener('click', () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1); renderInsights(); });
+$('calNext').addEventListener('click', () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1); renderInsights(); });
+$('viewDayBtn').addEventListener('click', () => {
+  $('fromDate').value = $('toDate').value = ymd(selDay);
+  applyRange(selDay.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }), null);
+  $('secOrders')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+function renderOrders() {
+  const now = new Date(), startDay = startOfDay(now), startWk = startOfWeek(now);
+  let tOrders = 0, tSales = 0, dayOrders = 0, daySales = 0, wkOrders = 0, wkSales = 0, pending = 0;
+  for (const o of loadedOrders) {
+    if (o.status === 'new') pending++;
+    if (!isValid(o)) continue;
+    tOrders++; if (isSale(o)) tSales += o.total;
+    if (o.date && o.date >= startWk) { wkOrders++; if (isSale(o)) wkSales += o.total; }
+    if (o.date && o.date >= startDay) { dayOrders++; if (isSale(o)) daySales += o.total; }
+  }
+  if (ordersLoaded) {
+    setNum('totalOrders', tOrders); setNum('stickyOrders', tOrders);
+    setNum('totalSales', tSales, 'money'); setNum('stickySales', tSales, 'compact');
+    setNum('ordersToday', dayOrders); setNum('salesToday', daySales, 'money');
+    setNum('ordersWeek', wkOrders); setNum('salesWeek', wkSales, 'money');
+    setNum('pendingOrders', pending); setNum('stickyPending', pending);
+  }
+  renderInsights();
+
+  const inRange = loadedOrders.filter(o => ((!range.from && !range.to) || (o.date && (!range.from || o.date >= range.from) && (!range.to || o.date <= range.to))) && matchesQuery(o));
+  const valid = inRange.filter(isValid);
+  const rangeSales = valid.reduce((n, o) => n + (isSale(o) ? o.total : 0), 0);
+  document.getElementById('salesSummary').textContent = `${range.label}: ${money(rangeSales)} from ${valid.length} order(s)`;
+  setStatusText(ordersStatus, `${range.label}: ${valid.length} order(s)` + (inRange.length > valid.length ? ` (+${inRange.length - valid.length} cancelled)` : '') + ` · all-time loaded: ${loadedOrders.length}`);
+
+  // daily / weekly breakdown for the selected range
+  const groups = new Map();
+  for (const o of valid) {
+    if (!o.date) continue;
+    const d = groupMode === 'week' ? startOfWeek(o.date) : startOfDay(o.date), k = ymd(d);
+    if (!groups.has(k)) groups.set(k, { d, n: 0, sales: 0 });
+    const g = groups.get(k); g.n++; if (isSale(o)) g.sales += o.total;
+  }
+  const bd = document.getElementById('breakdown'); bd.replaceChildren();
+  if (groups.size) {
+    const head = document.createElement('div'); head.className = 'bd-head'; head.textContent = groupMode === 'week' ? 'Orders per week' : 'Orders per day'; bd.appendChild(head);
+    [...groups.values()].sort((a, b) => b.d - a.d).forEach(g => {
+      const end = new Date(g.d); end.setDate(end.getDate() + 6);
+      const row = document.createElement('div'); row.className = 'bd-row';
+      row.innerHTML = `<span>${safeText(groupMode === 'week' ? fmtDay(g.d) + ' – ' + fmtDay(end) : fmtDay(g.d))}</span><span><b>${g.n}</b> order(s)<span data-owner-only> · <b>${safeText(money(g.sales))}</b></span></span>`;
+      bd.appendChild(row);
+    });
+  }
+
+  ordersList.replaceChildren();
+  if (!inRange.length) {
+    const p = document.createElement('p'); p.className = 'muted'; p.textContent = 'No orders for this date range.'; ordersList.appendChild(p); return;
+  }
+  for (const o of inRange.slice(0, 100)) {
+    const d = o.data;
+    const who = d.customerName ?? d.name ?? d.customer?.name ?? 'Customer';
+    const phone = d.phone ?? d.customerPhone ?? d.customer?.phone ?? '';
+    const row = document.createElement('div'); row.className = 'product-row'; row.dataset.status = o.status;
+    const info = document.createElement('div'); info.style.cssText = 'min-width:0;overflow-wrap:anywhere';
+    info.innerHTML = `<strong>#${safeText(orderCode(o))} · ${safeText(who)}</strong>` +
+      (d.paymentStatus === 'paid' ? '<span class="badge approved">Paid</span>' : '') +
+      `<div class="muted">${itemCount(d)} item(s): ${safeText(orderItemsText(d))}${phone ? ' · ' + safeText(phone) : ''}</div>` +
+      `<div class="muted">${o.date ? safeText(o.date.toLocaleString('en-IN')) : 'No date'}</div>` +
+      `<div style="color:#ffcf65;margin-top:4px">${safeText(money(o.total))}</div>`;
+    const sel = document.createElement('select'); sel.className = 'status-select';
+    const opts = ORDER_STATUSES.includes(o.status) ? ORDER_STATUSES : [...ORDER_STATUSES, o.status];
+    for (const st of opts) { const op = document.createElement('option'); op.value = st; op.textContent = st; if (st === o.status) op.selected = true; sel.appendChild(op); }
+    sel.addEventListener('change', async () => {
+      const previous = o.status; sel.disabled = true;
+      try {
+        await updateDoc(doc(db, 'Orders', o.id), { status: sel.value, updatedAt: serverTimestamp() });
+        o.status = sel.value; renderOrders(); setStatusText(ordersStatus, 'Order status updated.');
+      } catch (error) {
+        console.error('Order update failed', error); sel.value = previous; sel.disabled = false;
+        setStatusText(ordersStatus, `Status update failed (${error?.code || 'unknown'}). Check Firestore Rules.`, true);
+      }
+    });
+    const act = document.createElement('div'); act.className = 'ord-actions';
+    const det = document.createElement('button'); det.type = 'button'; det.className = 'logout'; det.textContent = 'View details';
+    det.addEventListener('click', () => openOrderModal(o));
+    act.append(det, sel);
+    row.append(info, act); ordersList.appendChild(row);
+  }
+}
+async function loadOrders() {
+  setStatusText(ordersStatus, 'Loading orders…');
+  try {
+    const snap = await getDocs(query(collection(db, 'Orders'), orderBy('createdAt', 'desc'), limit(1000)));
+    ordersLoaded = true;
+    loadedOrders = snap.docs.map(d => {
+      const data = d.data();
+      return { id: d.id, data, date: orderDate(data), total: orderTotal(data), status: String(data.status || 'new').toLowerCase() };
+    });
+    renderOrders();
+  } catch (error) {
+    console.error('Orders read failed', error);
+    loadedOrders = []; renderOrders();
+    for (const id of ['totalOrders','stickyOrders','totalSales','stickySales','pendingOrders','stickyPending','ordersToday','salesToday','ordersWeek','salesWeek']) setText(id, '—');
+    document.getElementById('salesSummary').textContent = '';
+    setStatusText(ordersStatus, `Orders read failed (${error?.code || 'unknown'}). Publish firestore.rules and check the collection name "Orders".${diag()}`, true);
+  }
+}
+document.getElementById('rangeChips').addEventListener('click', e => { const b = e.target.closest('[data-preset]'); if (b) setPreset(b.dataset.preset); });
+document.getElementById('applyRangeBtn').addEventListener('click', () => applyRange('Custom range', null));
+document.getElementById('groupChips').addEventListener('click', e => {
+  const b = e.target.closest('[data-group]'); if (!b) return;
+  groupMode = b.dataset.group;
+  document.querySelectorAll('#groupChips .chip').forEach(c => c.classList.toggle('active', c === b));
+  renderOrders();
+});
+
+// ===================== System check (owner) =====================
+async function runChecks() {
+  const box = document.getElementById('checkList'); box.replaceChildren();
+  const tests = [
+    ['Staff list (approval)', () => getDocs(query(collection(db, 'Users'), where('role', '==', 'staff'), limit(1)))],
+    ['Orders read', () => getDocs(query(collection(db, 'Orders'), limit(1)))],
+    ['Products read', () => getDocs(query(collection(db, 'Products'), limit(1)))]
+  ];
+  for (const [name, fn] of tests) {
+    const d = document.createElement('div'); d.className = 'chk'; d.textContent = name + ' …'; box.appendChild(d);
+    try { await fn(); d.className = 'chk ok'; d.textContent = '✓ ' + name; }
+    catch (e) { d.className = 'chk bad'; d.textContent = '✗ ' + name + ' — ' + (e?.code || 'error') + ' → publish the latest firestore.rules'; }
+  }
+}
+document.getElementById('runCheckBtn').addEventListener('click', runChecks);
+
+// ===================== V7: Staff approval (owner only) =====================
+const staffList = document.getElementById('staffList');
+const staffStatus = document.getElementById('staffStatus');
+async function setStaffState(uid, status) {
+  try {
+    await updateDoc(doc(db, 'Users', uid), { status, active: status === 'approved', reviewedAt: serverTimestamp() });
+    await loadStaff();
+  } catch (error) {
+    console.error('Staff update failed', error);
+    setStatusText(staffStatus, `Update failed (${error?.code || 'unknown'}). Check Firestore Rules.`, true);
+  }
+}
+async function loadStaff() {
+  if (currentRole !== 'owner') return;
+  setStatusText(staffStatus, 'Loading staff requests…');
+  try {
+    const snap = await getDocs(query(collection(db, 'Users'), where('role', '==', 'staff')));
+    const people = snap.docs.map(d => ({ id: d.id, data: d.data() }));
+    const rank = { pending: 0, approved: 1, rejected: 2 };
+    const statusOf = p => p.data.status === 'rejected' ? 'rejected' : (p.data.status === 'approved' || p.data.active === true ? 'approved' : 'pending');
+    people.sort((a, b) => (rank[statusOf(a)] ?? 3) - (rank[statusOf(b)] ?? 3));
+    staffList.replaceChildren();
+    if (!people.length) { const p = document.createElement('p'); p.className = 'muted'; p.textContent = 'No staff requests yet.'; staffList.appendChild(p); }
+    for (const person of people) {
+      const st = statusOf(person);
+      const row = document.createElement('div'); row.className = 'product-row';
+      const info = document.createElement('div'); info.style.cssText = 'min-width:0;overflow-wrap:anywhere';
+      info.innerHTML = `<strong>${safeText(person.data.name || 'No name')}</strong><span class="badge ${safeText(st)}">${safeText(st)}</span><div class="muted">${safeText(person.data.email || '')}</div>`;
+      const actions = document.createElement('div'); actions.style.cssText = 'display:flex;gap:6px;flex-shrink:0';
+      const mk = (label, next) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'logout'; b.textContent = label; b.addEventListener('click', () => setStaffState(person.id, next)); return b; };
+      if (st !== 'approved') actions.appendChild(mk('Approve', 'approved'));
+      if (st === 'approved') actions.appendChild(mk('Revoke', 'rejected'));
+      if (st === 'pending') actions.appendChild(mk('Reject', 'rejected'));
+      row.append(info, actions); staffList.appendChild(row);
+    }
+    const pending = people.filter(p => statusOf(p) === 'pending').length;
+    setStatusText(staffStatus, `${pending} pending · ${people.filter(p => statusOf(p) === 'approved').length} approved · ${people.length} total`);
+  } catch (error) {
+    console.error('Staff read failed', error);
+    setStatusText(staffStatus, `Staff list failed (${error?.code || 'unknown'}). Publish firestore.rules (owner must be allowed to list Users).${diag()}`, true);
+  }
+}
+
+// ===================== Login / logout wiring =====================
+window.addEventListener('sweetend:login', e => {
+  currentRole = e.detail.role;
+  ordersLoaded = false; resetInsights(); setPreset('today');
+  setText('todayLabel', new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
+  loadProducts(); loadOrders(); paintUser();
+  if (currentRole === 'owner') loadStaff();
+});
+window.addEventListener('sweetend:logout', () => {
+  toggleNav(false); closeProductModal(); profModal.hidden = true;
+  currentRole = null; loadedOrders = []; loadedProducts = []; ordersLoaded = false;
+  productsList.replaceChildren(); ordersList.replaceChildren(); staffList.replaceChildren();
+  for (const id of ['ordersWeek', 'salesWeek', 'productCount', 'ordersToday', 'salesToday', 'totalOrders', 'stickyOrders', 'totalSales', 'stickySales', 'pendingOrders', 'stickyPending', 'wkTotal', 'wkAvg', 'wkSales', 'wkVs']) document.getElementById(id).textContent = '—';
+  document.getElementById('salesSummary').textContent = '';
+});
+document.getElementById('reloadOrdersBtn').addEventListener('click', loadOrders);
+document.getElementById('reloadStaffBtn').addEventListener('click', loadStaff);
+</script>
+
+<script>
+(function(){const i=document.getElementById('password'),b=document.getElementById('pwEye');if(!i||!b)return;
+const set=on=>{i.type=on?'text':'password';b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-label',on?'Hide password':'Show password');};
+b.addEventListener('mousedown',e=>e.preventDefault());
+b.addEventListener('click',()=>{set(i.type==='password');i.focus();});
+window.addEventListener('sweetend:logout',()=>set(false));})();
+</script>
+</body>
+</html>
